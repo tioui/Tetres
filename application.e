@@ -13,8 +13,16 @@ feature {NONE} -- Initialization
 
 	make
 		local
-			init_ctrl:INIT_CONTROLLER
 			lib_ctrl:GAME_LIB_CONTROLLER
+		do
+			create lib_ctrl.make
+			run_standard(lib_ctrl)
+			lib_ctrl.quit_library
+		end
+
+	run_standard(lib_ctrl:GAME_LIB_CONTROLLER)
+		local
+			init_ctrl:INIT_CONTROLLER
 			theme_ctrl:THEME_CONTROLLER
 			ressource_cpf:GAME_PACKAGE_FILE
 			icon_trans_color:GAME_COLOR
@@ -31,7 +39,6 @@ feature {NONE} -- Initialization
 				if not init_ctrl.has_error then
 					create theme_ctrl.make (init_ctrl.theme_name)
 					if not theme_ctrl.has_error then
-						create lib_ctrl.make
 						lib_ctrl.enable_video
 						lib_ctrl.hide_mouse_cursor
 						lib_ctrl.enable_text
@@ -73,7 +80,6 @@ feature {NONE} -- Initialization
 								end
 							end
 						end
-						lib_ctrl.quit_library
 					end
 				end
 			end
@@ -102,11 +108,11 @@ feature {NONE} -- Initialization
 			create l_file.make_open_read ("ressources.cpf")
 			if l_file.exists and then l_file.is_readable then
 				create Result.make ("ressources.cpf",true)
-				check Result.sub_files_count=2 end
-				if Result.sub_files_count/=2 then
+				if Result.sub_files_count/=1 then
 					io.error.put_string ("Error: file ressources.cpf not valid%N")
 					io.error.flush
 					Result:=Void
+					check false end
 				end
 			else
 				io.error.put_string ("Error: ressources.cpf file not found%N")

@@ -132,7 +132,7 @@ feature -- Access
 
 	print_on_surface(l_surface:GAME_SURFACE;l_x,l_y:INTEGER)
 		local
-			i,j,pos_y,pos_x:INTEGER
+			i,j:INTEGER
 		do
 			from
 				i:=1
