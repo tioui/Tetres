@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<init>
+	<theme name="default"/>
+	<material video_memory="true" double_buffer="true"/>	
+	<ghost show="true"/>
+	<cpf font="false"/>
+</init>
