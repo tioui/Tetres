@@ -94,6 +94,15 @@ feature {NONE} -- Implementation - Routines
 			lib_ctrl.stop
 			create last_image_surface.make (screen_surface.width, screen_surface.height, screen_surface.bits_per_pixel, false)
 			last_image_surface.print_surface_on_surface (bg_surface, 0, 0)
+			if theme_ctrl.score_show then
+				print_score(last_image_surface)
+			end
+			if theme_ctrl.lines_show then
+				print_lines(last_image_surface)
+			end
+			if theme_ctrl.level_show then
+				print_level(last_image_surface)
+			end
 		end
 
 	on_key_press(keyboard_event:GAME_KEYBOARD_EVENT)
@@ -125,9 +134,7 @@ feature {NONE} -- Implementation - Routines
 					go_down
 				end
 			elseif keyboard_event.is_escape_key then
-				create last_image_surface.make (screen_surface.width, screen_surface.height, lib_ctrl.screen_surface.bits_per_pixel, false)
-				last_image_surface.print_surface_on_surface (bg_surface, 0, 0)
-				lib_ctrl.stop
+				on_quit
 			elseif keyboard_event.is_tab_key then
 				if theme_ctrl.hold_field_show then
 					hold_tetromino
@@ -326,39 +333,39 @@ feature {NONE} -- Implementation - Routines
 				print_next_field
 			end
 			if theme_ctrl.score_show then
-				print_score
+				print_score(screen_surface)
 			end
 			if theme_ctrl.lines_show then
-				print_lines
+				print_lines(screen_surface)
 			end
 			if theme_ctrl.level_show then
-				print_level
+				print_level(screen_surface)
 			end
 			lib_ctrl.flip_screen
 		end
 
-	print_level
+	print_level(target_surface:GAME_SURFACE)
 		local
 			text:GAME_SURFACE_TEXT
 		do
 			create text.make_blended (level.out, font, text_color)
-			screen_surface.print_surface_on_surface (text, theme_ctrl.level_x, theme_ctrl.level_y)
+			target_surface.print_surface_on_surface (text, theme_ctrl.level_x, theme_ctrl.level_y)
 		end
 
-	print_lines
+	print_lines(target_surface:GAME_SURFACE)
 		local
 			text:GAME_SURFACE_TEXT
 		do
 			create text.make_blended (nb_lines.out, font, text_color)
-			screen_surface.print_surface_on_surface (text, theme_ctrl.lines_x+(theme_ctrl.lines_w - text.width)//2, theme_ctrl.lines_y)
+			target_surface.print_surface_on_surface (text, theme_ctrl.lines_x+(theme_ctrl.lines_w - text.width)//2, theme_ctrl.lines_y)
 		end
 
-	print_score
+	print_score(target_surface:GAME_SURFACE)
 		local
 			text:GAME_SURFACE_TEXT
 		do
 			create text.make_blended (points.out, font, text_color)
-			screen_surface.print_surface_on_surface (text, theme_ctrl.score_x+(theme_ctrl.score_w - text.width)//2, theme_ctrl.score_y)
+			target_surface.print_surface_on_surface (text, theme_ctrl.score_x+(theme_ctrl.score_w - text.width)//2, theme_ctrl.score_y)
 		end
 
 	print_next_field
