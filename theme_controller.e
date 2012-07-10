@@ -62,10 +62,12 @@ feature {NONE} -- Initialization
 			menu_init_file_name:=directory_name+"menu-init.bmp"
 			menu_resume_file_name:=directory_name+"menu-resume.bmp"
 			game_over_file_name:=directory_name+"game-over.bmp"
+			lines_anim_file_name:=directory_name+"lines_anim.bmp"
 			menu_resume_mirror:=false
 			menu_new_game_mirror:=false
 			menu_settings_mirror:=false
 			menu_quit_mirror:=false
+			block_rotation:=false
 			menu_bg_alpha:=80
 			game_over_time:=2000
 			hold_field_show:=false
@@ -75,6 +77,8 @@ feature {NONE} -- Initialization
 			level_show:=false
 			font_size:=50
 			font_color:="000000"
+			lines_anim_show:=false
+			lines_anim_delay:=1000
 		end
 
 	process_document(document:XML_DOCUMENT)
@@ -121,6 +125,8 @@ feature {NONE} -- Initialization
 				process_lines_element(element)
 			elseif element.name.is_equal ("level") then
 				process_level_element(element)
+			elseif element.name.is_equal ("lines_anim") then
+				process_lines_anim_element(element)
 			end
 		end
 
@@ -195,6 +201,31 @@ feature {NONE} -- Initialization
 					end
 				elseif attributes.item_for_iteration.name.is_equal ("color") then
 					font_color:=attributes.item_for_iteration.value
+				end
+				attributes.forth
+			end
+		end
+
+	process_lines_anim_element(element:XML_ELEMENT)
+		local
+			attributes:LIST[XML_ATTRIBUTE]
+		do
+			attributes:=element.attributes
+			from
+				attributes.start
+			until
+				attributes.off
+			loop
+				if attributes.item_for_iteration.name.is_equal ("show") then
+					lines_anim_show:=attributes.item_for_iteration.value.is_equal ("true")
+				elseif attributes.item_for_iteration.name.is_equal ("delay") then
+					if attributes.item_for_iteration.value.is_natural then
+						lines_anim_delay:=attributes.item_for_iteration.value.to_natural
+					end
+				elseif attributes.item_for_iteration.name.is_equal ("step") then
+					if attributes.item_for_iteration.value.is_natural then
+						lines_anim_step:=attributes.item_for_iteration.value.to_natural
+					end
 				end
 				attributes.forth
 			end
@@ -342,6 +373,8 @@ feature {NONE} -- Initialization
 						block_height:=attributes.item_for_iteration.value.to_natural
 						is_height_set:=true
 					end
+				elseif attributes.item_for_iteration.name.is_equal ("rotation") then
+					block_rotation:=attributes.item_for_iteration.value.is_equal ("true")
 				end
 				attributes.forth
 			end
@@ -410,6 +443,8 @@ feature {NONE} -- Initialization
 					menu_resume_file_name:=directory_name+attributes.item_for_iteration.value
 				elseif attributes.item_for_iteration.name.is_equal ("game_over")then
 					game_over_file_name:=directory_name+attributes.item_for_iteration.value
+				elseif attributes.item_for_iteration.name.is_equal ("lines_anim")then
+					lines_anim_file_name:=directory_name+attributes.item_for_iteration.value
 				end
 				attributes.forth
 			end
@@ -557,6 +592,7 @@ feature -- Access
 
 	block_width:NATURAL
 	block_height:NATURAL
+	block_rotation:BOOLEAN
 
 	playfield_x:INTEGER
 	playfield_y:INTEGER
@@ -574,7 +610,7 @@ feature -- Access
 	font_file_name:STRING
 	arrow_file_name:STRING
 	game_over_file_name:STRING
-
+	lines_anim_file_name:STRING
 
 
 	ghost_alpha:NATURAL_8
@@ -622,6 +658,10 @@ feature -- Access
 	level_show:BOOLEAN
 	level_x:INTEGER
 	level_y:INTEGER
+
+	lines_anim_show:BOOLEAN
+	lines_anim_delay:NATURAL
+	lines_anim_step:NATURAL
 
 feature -- Error handelling
 

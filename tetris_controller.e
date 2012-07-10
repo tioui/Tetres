@@ -14,6 +14,8 @@ feature {NONE} -- Initialization
 
 	make(l_init_ctrl:INIT_CONTROLLER; l_theme_ctrl:THEME_CONTROLLER; l_lib_ctrl:GAME_LIB_CONTROLLER)
 			-- Initialization for `Current'.
+		local
+			anim_surface:GAME_SURFACE_IMG_FILE
 		do
 			init_ctrl:=l_init_ctrl
 			theme_ctrl:=l_theme_ctrl
@@ -23,11 +25,17 @@ feature {NONE} -- Initialization
 			screen_surface:=lib_ctrl.screen_surface
 			create bg_surface.make (theme_ctrl.bg_file_name)
 
-			create tetrominos_fact.make (blocks_surface, theme_ctrl.block_width, theme_ctrl.block_height)
+			create tetrominos_fact.make (blocks_surface, theme_ctrl.block_width, theme_ctrl.block_height,theme_ctrl.block_rotation)
 			if init_ctrl.is_ghost_show then
-				create tetrominos_fact_ghost.make_with_alpha (blocks_surface, theme_ctrl.block_width, theme_ctrl.block_height,theme_ctrl.ghost_alpha)
+				create tetrominos_fact_ghost.make_with_alpha (blocks_surface, theme_ctrl.block_width, theme_ctrl.block_height,theme_ctrl.block_rotation,theme_ctrl.ghost_alpha)
 			end
-			create pfield.make (theme_ctrl.playfield_x.to_integer_32, theme_ctrl.playfield_y.to_integer_32, theme_ctrl.block_width, theme_ctrl.block_height)
+			if theme_ctrl.lines_anim_show then
+				create anim_surface.make (theme_ctrl.lines_anim_file_name)
+				create pfield.make_with_anim (theme_ctrl.playfield_x.to_integer_32, theme_ctrl.playfield_y.to_integer_32, theme_ctrl.block_width, theme_ctrl.block_height,anim_surface,theme_ctrl.lines_anim_delay)
+			else
+				create pfield.make (theme_ctrl.playfield_x.to_integer_32, theme_ctrl.playfield_y.to_integer_32, theme_ctrl.block_width, theme_ctrl.block_height)
+			end
+
 			create rnd_bag.make(lib_ctrl,1,7)
 			init_currents_tetrominos
 			is_init:=false
@@ -43,6 +51,16 @@ feature {NONE} -- Initialization
 			is_hold_used:=false
 			nb_lines:=0
 			points:=0
+			anim_in_progress:=false
+			if theme_ctrl.score_show then
+				create score_surface.make_blended (points.out, font, text_color)
+			end
+			if theme_ctrl.lines_show then
+				create lines_surface.make_blended (nb_lines.out, font, text_color)
+			end
+			if theme_ctrl.level_show then
+				create level_surface.make_blended (level.out, font, text_color)
+			end
 		end
 
 feature -- Access
@@ -67,26 +85,51 @@ feature {NONE} -- Implementation - Routines
 
 	on_tick(nb_tick:NATURAL_32)
 		do
-			if not is_init then
-				down_tick_number:=lib_ctrl.get_ticks
-				is_init:=true
-			elseif down_pressed and then lib_ctrl.get_ticks>down_tick_number+30 then
-				down_tick_number:=lib_ctrl.get_ticks
-				go_down
-			elseif lib_ctrl.get_ticks>down_tick_number+down_delay then
-				down_tick_number:=lib_ctrl.get_ticks
-				go_down
-			elseif left_pressed and then lib_ctrl.get_ticks>move_tick_number+move_delay then
-				move_tick_number:=lib_ctrl.get_ticks
-				move_delay:=30
-				move_left
-			elseif right_pressed and then lib_ctrl.get_ticks>move_tick_number+move_delay then
-				move_tick_number:=lib_ctrl.get_ticks
-				move_delay:=30
-				move_right
+			if anim_in_progress then
+				cont_anim
+			else
+				if not is_init then
+					down_tick_number:=lib_ctrl.get_ticks
+					is_init:=true
+				elseif down_pressed and then lib_ctrl.get_ticks>down_tick_number+30 then
+					down_tick_number:=lib_ctrl.get_ticks
+					go_down
+				elseif lib_ctrl.get_ticks>down_tick_number+down_delay then
+					down_tick_number:=lib_ctrl.get_ticks
+					go_down
+				elseif left_pressed and then lib_ctrl.get_ticks>move_tick_number+move_delay then
+					move_tick_number:=lib_ctrl.get_ticks
+					move_delay:=30
+					move_left
+				elseif right_pressed and then lib_ctrl.get_ticks>move_tick_number+move_delay then
+					move_tick_number:=lib_ctrl.get_ticks
+					move_delay:=30
+					move_right
+				end
+				update_screen
 			end
 
-			update_screen
+		end
+
+
+	cont_anim
+		local
+			l_ticks:NATURAL
+		do
+			l_ticks:=lib_ctrl.get_ticks
+			if l_ticks>=anim_start+(theme_ctrl.lines_anim_delay*theme_ctrl.lines_anim_step) then
+				anim_current_value:=theme_ctrl.lines_anim_delay
+				update_screen
+				anim_in_progress:=false
+				pfield.delete_full_line
+				mem.full_collect
+			else
+				anim_current_value:=(l_ticks-anim_start)//theme_ctrl.lines_anim_step
+				if anim_current_value=theme_ctrl.lines_anim_delay//2 then
+					pfield.remove_full_lines_block
+				end
+				update_screen
+			end
 		end
 
 	on_quit
@@ -158,15 +201,25 @@ feature {NONE} -- Implementation - Routines
 	rotate_left
 		do
 			currents_tetrominos.first.rotate_left
-			if pfield.detect_collision (currents_tetrominos.first) then
-				currents_tetrominos.first.cancel_last_move
-			end
-			update_ghost
+			finish_rotation
 		end
 
 	rotate_right
 		do
 			currents_tetrominos.first.rotate_right
+			finish_rotation
+		end
+
+	finish_rotation
+		do
+			from
+				currents_tetrominos.first.wall_kick
+			until
+				not pfield.detect_collision (currents_tetrominos.first) or
+				currents_tetrominos.first.wall_kick_exhausted
+			loop
+				currents_tetrominos.first.wall_kick
+			end
 			if pfield.detect_collision (currents_tetrominos.first) then
 				currents_tetrominos.first.cancel_last_move
 			end
@@ -224,13 +277,28 @@ feature {NONE} -- Implementation - Routines
 				if nb_lines>999999999 then
 					nb_lines:=999999999
 				end
+				if theme_ctrl.score_show then
+					create score_surface.make_blended (points.out, font, text_color)
+				end
+				if theme_ctrl.lines_show then
+					create lines_surface.make_blended (nb_lines.out, font, text_color)
+				end
+				if theme_ctrl.level_show then
+					create level_surface.make_blended (level.out, font, text_color)
+				end
 				new_delay:=1050-(50*level)
 				if new_delay<=0 then
 					new_delay:=1
 				end
-				down_delay:=new_delay.to_natural_32
-				pfield.delete_full_line
-				mem.full_collect
+				if theme_ctrl.lines_anim_show then
+					pfield.prepare_anim
+					anim_in_progress:=true
+					anim_start:=lib_ctrl.get_ticks
+				else
+					down_delay:=new_delay.to_natural_32
+					pfield.delete_full_line
+					mem.full_collect
+				end
 			end
 		end
 
@@ -341,31 +409,25 @@ feature {NONE} -- Implementation - Routines
 			if theme_ctrl.level_show then
 				print_level(screen_surface)
 			end
+			if anim_in_progress then
+				pfield.print_playfield_with_anim (screen_surface, anim_current_value)
+			end
 			lib_ctrl.flip_screen
 		end
 
 	print_level(target_surface:GAME_SURFACE)
-		local
-			text:GAME_SURFACE_TEXT
 		do
-			create text.make_blended (level.out, font, text_color)
-			target_surface.print_surface_on_surface (text, theme_ctrl.level_x, theme_ctrl.level_y)
+			target_surface.print_surface_on_surface (level_surface, theme_ctrl.level_x, theme_ctrl.level_y)
 		end
 
 	print_lines(target_surface:GAME_SURFACE)
-		local
-			text:GAME_SURFACE_TEXT
 		do
-			create text.make_blended (nb_lines.out, font, text_color)
-			target_surface.print_surface_on_surface (text, theme_ctrl.lines_x+(theme_ctrl.lines_w - text.width)//2, theme_ctrl.lines_y)
+			target_surface.print_surface_on_surface (lines_surface, theme_ctrl.lines_x+(theme_ctrl.lines_w - lines_surface.width)//2, theme_ctrl.lines_y)
 		end
 
 	print_score(target_surface:GAME_SURFACE)
-		local
-			text:GAME_SURFACE_TEXT
 		do
-			create text.make_blended (points.out, font, text_color)
-			target_surface.print_surface_on_surface (text, theme_ctrl.score_x+(theme_ctrl.score_w - text.width)//2, theme_ctrl.score_y)
+			target_surface.print_surface_on_surface (score_surface, theme_ctrl.score_x+(theme_ctrl.score_w - score_surface.width)//2, theme_ctrl.score_y)
 		end
 
 	print_next_field
@@ -442,11 +504,19 @@ feature {NONE} -- Implementation - Variables
 
 	nb_lines:INTEGER
 
+
 	points:INTEGER
 
 	font:GAME_FONT
 	text_color:GAME_COLOR
 
+	level_surface:GAME_SURFACE_TEXT
+	score_surface:GAME_SURFACE_TEXT
+	lines_surface:GAME_SURFACE_TEXT
+
+	anim_in_progress:BOOLEAN
+	anim_start:NATURAL
+	anim_current_value:NATURAL
 
 
 

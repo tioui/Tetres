@@ -20,10 +20,10 @@ create
 
 feature {NONE} -- Initialization
 
-	make(l_surface:GAME_SURFACE;block_width,block_height:NATURAL)
+	make(l_surface:GAME_SURFACE;block_width,block_height:NATURAL;rotation:BOOLEAN)
 			-- Initialization for `Current'.
 		do
-			make_tetromino(l_surface,6,block_width,block_height)
+			make_tetromino(l_surface,6,block_width,block_height,rotation)
 		end
 
 

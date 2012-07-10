@@ -39,10 +39,10 @@ feature {NONE} -- Initialization
 			create screen_surface.make (lib_ctrl.screen_surface.width, lib_ctrl.screen_surface.height, lib_ctrl.screen_surface.bits_per_pixel, false)
 			screen_surface.set_overall_alpha_value (255)
 			create bg_surface.make_with_alpha (theme_ctrl.bg_file_name)
-			create tetrominos_fact.make_with_alpha (blocks_surface, theme_ctrl.block_width, theme_ctrl.block_height,alpha)
+			create tetrominos_fact.make_with_alpha (blocks_surface, theme_ctrl.block_width, theme_ctrl.block_height,theme_ctrl.block_rotation,alpha)
 			if init_ctrl.is_ghost_show then
 				ghost_alpha:=(theme_ctrl.ghost_alpha//(255//alpha.to_integer_32)).to_natural_8
-				create tetrominos_fact_ghost.make_with_alpha (blocks_surface, theme_ctrl.block_width, theme_ctrl.block_height,ghost_alpha.to_natural_8)
+				create tetrominos_fact_ghost.make_with_alpha (blocks_surface, theme_ctrl.block_width, theme_ctrl.block_height,theme_ctrl.block_rotation,ghost_alpha.to_natural_8)
 			end
 			create pfield.make (theme_ctrl.playfield_x.to_integer_32, theme_ctrl.playfield_y.to_integer_32, theme_ctrl.block_width, theme_ctrl.block_height)
 			create rnd_bag.make(lib_ctrl,1,7)

@@ -13,22 +13,22 @@ create
 
 feature {NONE} -- Initialization
 
-	make(ressource_surface:GAME_SURFACE;block_width,block_height:NATURAL)
+	make(ressource_surface:GAME_SURFACE;block_width,block_height:NATURAL;rotation:BOOLEAN)
 			-- Initialization for `Current'.
 		do
-			create tet_i.make (ressource_surface, block_width, block_height)
-			create tet_j.make (ressource_surface, block_width, block_height)
-			create tet_l.make (ressource_surface, block_width, block_height)
-			create tet_o.make (ressource_surface, block_width, block_height)
-			create tet_s.make (ressource_surface, block_width, block_height)
-			create tet_t.make (ressource_surface, block_width, block_height)
-			create tet_z.make (ressource_surface, block_width, block_height)
+			create tet_i.make (ressource_surface, block_width, block_height,rotation)
+			create tet_j.make (ressource_surface, block_width, block_height,rotation)
+			create tet_l.make (ressource_surface, block_width, block_height,rotation)
+			create tet_o.make (ressource_surface, block_width, block_height,rotation)
+			create tet_s.make (ressource_surface, block_width, block_height,rotation)
+			create tet_t.make (ressource_surface, block_width, block_height,rotation)
+			create tet_z.make (ressource_surface, block_width, block_height,rotation)
 
 		end
 
-	make_with_alpha(ressource_surface:GAME_SURFACE;block_width,block_height:NATURAL;alpha_value:NATURAL_8)
+	make_with_alpha(ressource_surface:GAME_SURFACE;block_width,block_height:NATURAL;rotation:BOOLEAN;alpha_value:NATURAL_8)
 		do
-			make(ressource_surface,block_width,block_height)
+			make(ressource_surface,block_width,block_height,rotation)
 			tet_i.set_ghost_effect(alpha_value)
 			tet_j.set_ghost_effect(alpha_value)
 			tet_l.set_ghost_effect(alpha_value)
