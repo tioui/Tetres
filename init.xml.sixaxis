@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<init>
+	<theme name="default"/>
+	<material video_memory="true" double_buffer="true"/>	
+	<ghost show="true"/>
+	<cpf font="false"/>
+	<custom_control> 
+		<keyboard menu_up="111" menu_down="116" menu_left="113" menu_right="114" menu_enter="36" menu_back="9" game_left="113" game_right="114" game_down="116" game_drop="111" game_rotate_left="38" game_rotate_right="39" game_hold="23" game_pause="9"/>
+		<joystick device_id="0">
+			<buttons menu_up="4" menu_down="6" menu_left="7" menu_right="5" menu_enter="14" menu_back="13" game_left="7" game_right="5" game_down="6" game_drop="4" game_rotate_left="15" game_rotate_right="14" game_hold="12" game_pause="3"/>
+			<axis menu_up_axis_id="1" menu_up_lower_than="-27000" menu_down_axis_id="1" menu_down_upper_than="27000" menu_left_axis_id="0" menu_left_lower_than="-27000" menu_right_axis_id="0" menu_right_upper_than="27000"game_drop_axis_id="1" game_drop_lower_than="-27000" game_down_axis_id="1" game_down_upper_than="27000" game_left_axis_id="0" game_left_lower_than="-27000" game_right_axis_id="0" game_right_upper_than="27000"/>
+		</joystick>
+
+	</custom_control>
+	<sound thread="false">
+</init>

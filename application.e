@@ -37,11 +37,29 @@ feature {NONE} -- Initialization
 			if ressource_cpf/=Void then
 				create init_ctrl.make
 				if not init_ctrl.has_error then
+
 					create theme_ctrl.make (init_ctrl.theme_name)
 					if not theme_ctrl.has_error then
 						lib_ctrl.enable_video
+						if theme_ctrl.is_sound_enable then
+							lib_ctrl.enable_sound
+							if init_ctrl.is_sound_thread then
+								lib_ctrl.enable_sound_thread
+							end
+						end
 						lib_ctrl.hide_mouse_cursor
 						lib_ctrl.enable_text
+						if init_ctrl.custom_control_enable and then init_ctrl.custom_control_ctrl.joystick_enable then
+							lib_ctrl.enable_joystick
+							lib_ctrl.enable_event_thread
+							if init_ctrl.custom_control_ctrl.joystick_device_id<lib_ctrl.get_joystick_count then
+								lib_ctrl.get_joystick (init_ctrl.custom_control_ctrl.joystick_device_id).open
+							else
+								io.error.put_string ("Warning: Cannot open Joystick number "+init_ctrl.custom_control_ctrl.joystick_device_id.out)
+								io.error.put_new_line
+								io.error.flush
+							end
+						end
 						create icon_trans_color.make_rgb (255,0,255)
 						width:=theme_ctrl.width
 						height:=theme_ctrl.height
@@ -59,10 +77,13 @@ feature {NONE} -- Initialization
 							show_menu(is_resume,temp_surface,init_ctrl, theme_ctrl, lib_ctrl)
 							lib_ctrl.clear_event_controller
 							mem.full_collect
+							mem.full_coalesce
 							if starting or resuming then
 								if starting then
+									lib_ctrl.wipe_sources
 									create tetris_ctrl.make(init_ctrl, theme_ctrl, lib_ctrl)
 									mem.full_collect
+									mem.full_coalesce
 								end
 								if resuming then
 									tetris_ctrl.resume
@@ -70,6 +91,7 @@ feature {NONE} -- Initialization
 								tetris_ctrl.launch
 								lib_ctrl.clear_event_controller
 								mem.full_collect
+								mem.full_coalesce
 								if tetris_ctrl.is_game_over then
 									game_over_screen (lib_ctrl, theme_ctrl,tetris_ctrl.last_image_surface)
 									temp_surface:=Void
@@ -99,6 +121,7 @@ feature {NONE} -- Initialization
 			quitting:=menu_ctrl.is_quitting
 			resuming:=menu_ctrl.is_resuming
 			starting:=menu_ctrl.start_game
+			menu_ctrl.dispose
 		end
 
 	create_cpf:GAME_PACKAGE_FILE
@@ -107,7 +130,7 @@ feature {NONE} -- Initialization
 		do
 			create l_file.make_open_read ("ressources.cpf")
 			if l_file.exists and then l_file.is_readable then
-				create Result.make ("ressources.cpf",true)
+				create Result.make ("ressources.cpf",false)
 				if Result.sub_files_count/=1 then
 					io.error.put_string ("Error: file ressources.cpf not valid%N")
 					io.error.flush

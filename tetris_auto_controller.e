@@ -63,6 +63,25 @@ feature {NONE} -- Initialization
 			auto_right_tetromino_rotation:=lib_ctrl.last_random_integer_between (1, 7)
 		end
 
+feature -- Access
+
+	print_screen
+		do
+			screen_surface.fill_rect (create {GAME_COLOR}.make_rgb(0,0,0), 0, 0, lib_ctrl.screen_surface.width, lib_ctrl.screen_surface.height)
+			screen_surface.print_surface_on_surface (bg_surface, 0, 0)
+			if init_ctrl.is_ghost_show then
+				update_ghost
+				pfield.print_playfield_with_tetromino_and_ghost (currents_tetrominos.first,current_tetromino_ghost, screen_surface)
+			else
+				pfield.print_playfield_with_tetromino (currents_tetrominos.first,screen_surface)
+			end
+			if theme_ctrl.hold_field_show and holded_tetromino/=Void then
+				holded_tetromino.print_on_surface (screen_surface, theme_ctrl.hold_field_x, theme_ctrl.hold_field_y)
+			end
+			if theme_ctrl.next_field_show then
+				print_next_field
+			end
+		end
 
 feature {NONE} -- Implementation - Routines
 
@@ -76,15 +95,9 @@ feature {NONE} -- Implementation - Routines
 					rotate_right
 					auto_right_tetromino_rotation:=auto_right_tetromino_rotation-1
 				elseif not right_pressed and then auto_next_tetromino_position>currents_tetrominos.first.x then
-					move_right
-					move_delay:=300
-					move_tick_number:=lib_ctrl.get_ticks
-					right_pressed:=true
+					start_move_right
 				elseif not left_pressed and then auto_next_tetromino_position<currents_tetrominos.first.x then
-					move_left
-					move_delay:=300
-					move_tick_number:=lib_ctrl.get_ticks
-					left_pressed:=true
+					start_move_left
 				elseif right_pressed and then auto_next_tetromino_position<=currents_tetrominos.first.x then
 					right_pressed:=false
 				elseif left_pressed and then auto_next_tetromino_position>=currents_tetrominos.first.x then
@@ -110,20 +123,7 @@ feature {NONE} -- Implementation - Routines
 
 	update_screen
 		do
-			screen_surface.fill_rect (create {GAME_COLOR}.make_rgb(0,0,0), 0, 0, lib_ctrl.screen_surface.width, lib_ctrl.screen_surface.height)
-			screen_surface.print_surface_on_surface (bg_surface, 0, 0)
-			if init_ctrl.is_ghost_show then
-				update_ghost
-				pfield.print_playfield_with_tetromino_and_ghost (currents_tetrominos.first,current_tetromino_ghost, screen_surface)
-			else
-				pfield.print_playfield_with_tetromino (currents_tetrominos.first,screen_surface)
-			end
-			if theme_ctrl.hold_field_show and holded_tetromino/=Void then
-				holded_tetromino.print_on_surface (screen_surface, theme_ctrl.hold_field_x, theme_ctrl.hold_field_y)
-			end
-			if theme_ctrl.next_field_show then
-				print_next_field
-			end
+
 		end
 
 	game_over

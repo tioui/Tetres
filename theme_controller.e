@@ -79,6 +79,14 @@ feature {NONE} -- Initialization
 			font_color:="000000"
 			lines_anim_show:=false
 			lines_anim_delay:=1000
+			is_sound_menu_move:=false
+			is_sound_menu_enter:=false
+			is_sound_game_rotation:=false
+			is_sound_game_drop:=false
+			is_sound_game_move:=false
+			is_sound_game_anim:=false
+			is_sound_game_collapse:=false
+			is_sound_game_down:=false
 		end
 
 	process_document(document:XML_DOCUMENT)
@@ -445,6 +453,38 @@ feature {NONE} -- Initialization
 					game_over_file_name:=directory_name+attributes.item_for_iteration.value
 				elseif attributes.item_for_iteration.name.is_equal ("lines_anim")then
 					lines_anim_file_name:=directory_name+attributes.item_for_iteration.value
+				elseif attributes.item_for_iteration.name.is_equal ("sound_menu_move")then
+					is_sound_menu_move:=true
+					is_sound_enable:=true
+					sound_menu_move_file:=directory_name+attributes.item_for_iteration.value
+				elseif attributes.item_for_iteration.name.is_equal ("sound_menu_enter")then
+					is_sound_menu_enter:=true
+					is_sound_enable:=true
+					sound_menu_enter_file:=directory_name+attributes.item_for_iteration.value
+				elseif attributes.item_for_iteration.name.is_equal ("sound_game_rotation")then
+					is_sound_game_rotation:=true
+					is_sound_enable:=true
+					sound_game_rotation_file:=directory_name+attributes.item_for_iteration.value
+				elseif attributes.item_for_iteration.name.is_equal ("sound_game_drop")then
+					is_sound_game_drop:=true
+					is_sound_enable:=true
+					sound_game_drop_file:=directory_name+attributes.item_for_iteration.value
+				elseif attributes.item_for_iteration.name.is_equal ("sound_game_move")then
+					is_sound_game_move:=true
+					is_sound_enable:=true
+					sound_game_move_file:=directory_name+attributes.item_for_iteration.value
+				elseif attributes.item_for_iteration.name.is_equal ("sound_game_down")then
+					is_sound_game_down:=true
+					is_sound_enable:=true
+					sound_game_down_file:=directory_name+attributes.item_for_iteration.value
+				elseif attributes.item_for_iteration.name.is_equal ("sound_game_anim")then
+					is_sound_game_anim:=true
+					is_sound_enable:=true
+					sound_game_anim_file:=directory_name+attributes.item_for_iteration.value
+				elseif attributes.item_for_iteration.name.is_equal ("sound_game_collapse")then
+					is_sound_game_collapse:=true
+					is_sound_enable:=true
+					sound_game_collapse_file:=directory_name+attributes.item_for_iteration.value
 				end
 				attributes.forth
 			end
@@ -662,6 +702,24 @@ feature -- Access
 	lines_anim_show:BOOLEAN
 	lines_anim_delay:NATURAL
 	lines_anim_step:NATURAL
+
+	is_sound_enable:BOOLEAN
+	is_sound_menu_move:BOOLEAN
+	sound_menu_move_file:STRING
+	is_sound_menu_enter:BOOLEAN
+	sound_menu_enter_file:STRING
+	is_sound_game_rotation:BOOLEAN
+	sound_game_rotation_file:STRING
+	is_sound_game_drop:BOOLEAN
+	sound_game_drop_file:STRING
+	is_sound_game_move:BOOLEAN
+	sound_game_move_file:STRING
+	is_sound_game_down:BOOLEAN
+	sound_game_down_file:STRING
+	is_sound_game_anim:BOOLEAN
+	sound_game_anim_file:STRING
+	is_sound_game_collapse:BOOLEAN
+	sound_game_collapse_file:STRING
 
 feature -- Error handelling
 

@@ -1,0 +1,27 @@
+drop.aif:
+Creative Commons 0 License.
+http://www.freesound.org/people/Heigh-hoo/sounds/9876/
+
+rotation.wav
+Creative Common Attribution License
+http://www.freesound.org/people/TicTacShutUp/sounds/406/
+
+menu-move.wav
+Creative Common Sampling Plus 1.0
+http://www.freesound.org/people/THE_bizniss/sounds/39562/
+
+menu-enter.wav
+Creative Common Sampling Plus 1.0
+http://www.freesound.org/people/THE_bizniss/sounds/39562/
+
+anim.wav
+Creative Common Sampling Plus 1.0
+http://www.freesound.org/people/man/sounds/14609/
+
+collapse.aif:
+Creative Commons 0 License.
+http://www.freesound.org/people/Heigh-hoo/sounds/9876/
+
+game-move.wav
+Creative Common Sampling Plus 1.0
+http://www.freesound.org/people/THE_bizniss/sounds/39562/

@@ -4,4 +4,5 @@
 	<material video_memory="true" double_buffer="true"/>	
 	<ghost show="true"/>
 	<cpf font="false"/>
+	<sound thread="false">
 </init>

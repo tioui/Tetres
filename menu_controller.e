@@ -7,6 +7,7 @@ note
 class
 	MENU_CONTROLLER
 
+
 create
 	make,
 	make_with_resume
@@ -21,6 +22,7 @@ feature {NONE} -- Initialization
 			resume_enable:=false
 			create {GAME_SURFACE_IMG_FILE} fg_surface.make_with_alpha(theme_ctrl.menu_init_file_name)
 			start_game:=true
+			is_animate:=true
 		end
 
 	make_with_resume(l_surface:GAME_SURFACE;l_init_ctrl:INIT_CONTROLLER; l_theme_ctrl:THEME_CONTROLLER; l_lib_ctrl:GAME_LIB_CONTROLLER)
@@ -34,6 +36,8 @@ feature {NONE} -- Initialization
 			resume_enable:=true
 			create {GAME_SURFACE_IMG_FILE} fg_surface.make_with_alpha(theme_ctrl.menu_resume_file_name)
 			is_resuming:=true
+			is_animate:=false
+			update_screen
 		end
 
 	make_default(l_init_ctrl:INIT_CONTROLLER; l_theme_ctrl:THEME_CONTROLLER; l_lib_ctrl:GAME_LIB_CONTROLLER)
@@ -44,13 +48,41 @@ feature {NONE} -- Initialization
 			create {GAME_SURFACE_IMG_FILE} arrow_surface.make_with_alpha(theme_ctrl.arrow_file_name)
 			arrow_mirror_surface:=arrow_surface.get_new_surface_mirror (true, false)
 			lib_ctrl.event_controller.on_quit_signal.extend (agent on_quit)
-			lib_ctrl.event_controller.on_key_down.extend (agent on_key_press)
+			if init_ctrl.custom_control_enable then
+				if init_ctrl.custom_control_ctrl.keyboard_enable then
+					lib_ctrl.event_controller.on_key_down.extend (agent on_custom_key_press)
+					lib_ctrl.event_controller.on_key_up.extend (agent on_custom_key_release)
+				end
+				if init_ctrl.custom_control_ctrl.joystick_enable then
+					lib_ctrl.event_controller.enable_joystick_event
+					if init_ctrl.custom_control_ctrl.joystick_buttons_enable then
+						lib_ctrl.event_controller.on_joystick_button_pressed.extend (agent custom_joystick_button_press)
+						lib_ctrl.event_controller.on_joystick_button_released.extend (agent custom_joystick_button_release)
+					end
+					if init_ctrl.custom_control_ctrl.joystick_axis_enable then
+						lib_ctrl.event_controller.on_joystick_axis_change.extend (agent custom_joystick_axis_change)
+					end
+				end
+
+			else
+				lib_ctrl.event_controller.on_key_down.extend (agent on_default_key_press)
+			end
+			if theme_ctrl.is_sound_enable then
+				lib_ctrl.source_add
+				sound_source:=lib_ctrl.source_get_last_add
+			end
+			if theme_ctrl.is_sound_menu_enter then
+				create {GAME_AUDIO_SOUND_FILE} sound_enter.make (theme_ctrl.sound_menu_enter_file)
+			end
+			if theme_ctrl.is_sound_menu_move then
+				create {GAME_AUDIO_SOUND_FILE} sound_move.make (theme_ctrl.sound_menu_move_file)
+			end
 			lib_ctrl.event_controller.on_tick.extend (agent on_tick)
 			is_quitting:=false
 			start_game:=false
 			is_resuming:=false
 			is_settings:=false
-			create mem
+			stop_on_enter_sound_finish:=false
 		end
 
 feature -- Access
@@ -58,7 +90,14 @@ feature -- Access
 	launch
 		do
 			lib_ctrl.launch
-
+			if stop_on_enter_sound_finish then
+				from
+				until not sound_source.is_playing
+				loop
+					lib_ctrl.update_sound_playing
+					lib_ctrl.delay (100)
+				end
+			end
 		end
 
 	is_quitting:BOOLEAN
@@ -69,11 +108,23 @@ feature -- Access
 
 	is_settings:BOOLEAN
 
+	dispose
+		do
+			if theme_ctrl.is_sound_enable then
+				sound_source.stop
+				lib_ctrl.sources_remove (sound_source)
+			end
+
+		end
+
 feature {NONE} -- Implementation - Routines
 
 	on_tick(nb_tick:NATURAL_32)
 		do
-			update_screen
+			if last_tick+100<lib_ctrl.get_ticks then
+				update_screen
+				last_tick:=lib_ctrl.get_ticks
+			end
 		end
 
 	on_quit
@@ -85,7 +136,7 @@ feature {NONE} -- Implementation - Routines
 			lib_ctrl.stop
 		end
 
-	on_key_press(keyboard_event:GAME_KEYBOARD_EVENT)
+	on_default_key_press(keyboard_event:GAME_KEYBOARD_EVENT)
 		do
 			if keyboard_event.is_escape_key then
 				if resume_enable then
@@ -103,7 +154,143 @@ feature {NONE} -- Implementation - Routines
 			elseif keyboard_event.is_up_key then
 				move_up
 			elseif keyboard_event.is_return_key then
-				lib_ctrl.stop
+				on_enter
+			end
+		end
+
+	on_custom_key_press(keyboard_event:GAME_KEYBOARD_EVENT)
+		do
+			if not back_pressed and keyboard_event.scancode = init_ctrl.custom_control_ctrl.keyboard_menu_back then
+				if resume_enable then
+					is_quitting:=false
+					start_game:=false
+					is_resuming:=true
+					is_settings:=false
+					lib_ctrl.stop
+				else
+					on_quit
+				end
+				back_pressed:=true
+			elseif not down_pressed and keyboard_event.scancode = init_ctrl.custom_control_ctrl.keyboard_menu_down then
+				move_down
+				down_pressed:=true
+			elseif  not up_pressed and keyboard_event.scancode = init_ctrl.custom_control_ctrl.keyboard_menu_up then
+				move_up
+				up_pressed:=true
+			elseif  not enter_pressed and keyboard_event.scancode = init_ctrl.custom_control_ctrl.keyboard_menu_enter then
+				on_enter
+				enter_pressed:=true
+			end
+		end
+
+	on_custom_key_release(keyboard_event:GAME_KEYBOARD_EVENT)
+		do
+			if keyboard_event.scancode = init_ctrl.custom_control_ctrl.keyboard_menu_back then
+				back_pressed:=false
+			elseif keyboard_event.scancode = init_ctrl.custom_control_ctrl.keyboard_menu_down then
+				down_pressed:=false
+			elseif keyboard_event.scancode = init_ctrl.custom_control_ctrl.keyboard_menu_up then
+				up_pressed:=false
+			elseif keyboard_event.scancode = init_ctrl.custom_control_ctrl.keyboard_menu_enter then
+				enter_pressed:=false
+			end
+		end
+
+	custom_joystick_button_press(button_id,device_id:NATURAL_8)
+		do
+			if device_id=init_ctrl.custom_control_ctrl.joystick_device_id then
+				if not back_pressed and button_id = init_ctrl.custom_control_ctrl.joystick_button_menu_back then
+					if resume_enable then
+						is_quitting:=false
+						start_game:=false
+						is_resuming:=true
+						is_settings:=false
+						lib_ctrl.stop
+					else
+						on_quit
+					end
+					back_pressed:=true
+				elseif not down_pressed and button_id = init_ctrl.custom_control_ctrl.joystick_button_menu_down then
+					move_down
+					down_pressed:=true
+				elseif  not up_pressed and button_id = init_ctrl.custom_control_ctrl.joystick_button_menu_up then
+					move_up
+					up_pressed:=true
+				elseif  not enter_pressed and button_id = init_ctrl.custom_control_ctrl.joystick_button_menu_enter then
+					on_enter
+					enter_pressed:=true
+				end
+			end
+		end
+
+	custom_joystick_button_release(button_id,device_id:NATURAL_8)
+		do
+			if device_id=init_ctrl.custom_control_ctrl.joystick_device_id then
+				if button_id = init_ctrl.custom_control_ctrl.joystick_button_menu_back then
+					back_pressed:=false
+				elseif button_id = init_ctrl.custom_control_ctrl.joystick_button_menu_down then
+					down_pressed:=false
+				elseif button_id = init_ctrl.custom_control_ctrl.joystick_button_menu_up then
+					up_pressed:=false
+				elseif button_id = init_ctrl.custom_control_ctrl.joystick_button_menu_enter then
+					enter_pressed:=false
+				end
+			end
+		end
+
+	custom_joystick_axis_change(value:INTEGER_16;axis_id,device_id:NATURAL_8)
+		local
+			active_state:BOOLEAN
+		do
+			if device_id=init_ctrl.custom_control_ctrl.joystick_device_id then
+				if axis_id=init_ctrl.custom_control_ctrl.joystick_axis_menu_back.axis_id then
+					active_state:=	value>init_ctrl.custom_control_ctrl.joystick_axis_menu_back.upper_than or
+									value<init_ctrl.custom_control_ctrl.joystick_axis_menu_back.lower_than
+					if not back_pressed and active_state then
+						if resume_enable then
+							is_quitting:=false
+							start_game:=false
+							is_resuming:=true
+							is_settings:=false
+							lib_ctrl.stop
+						else
+							on_quit
+						end
+						back_pressed:=true
+					else
+						back_pressed:=active_state
+					end
+				end
+				if axis_id=init_ctrl.custom_control_ctrl.joystick_axis_menu_down.axis_id then
+					active_state:=	value>init_ctrl.custom_control_ctrl.joystick_axis_menu_down.upper_than or
+									value<init_ctrl.custom_control_ctrl.joystick_axis_menu_down.lower_than
+					if not down_pressed and active_state then
+						move_down
+						down_pressed:=true
+					else
+						down_pressed:=active_state
+					end
+				end
+				if axis_id=init_ctrl.custom_control_ctrl.joystick_axis_menu_up.axis_id then
+					active_state:=	value>init_ctrl.custom_control_ctrl.joystick_axis_menu_up.upper_than or
+									value<init_ctrl.custom_control_ctrl.joystick_axis_menu_up.lower_than
+					if not up_pressed and active_state then
+						move_up
+						up_pressed:=true
+					else
+						up_pressed:=active_state
+					end
+				end
+				if axis_id=init_ctrl.custom_control_ctrl.joystick_axis_menu_enter.axis_id then
+					active_state:=	value>init_ctrl.custom_control_ctrl.joystick_axis_menu_enter.upper_than or
+									value<init_ctrl.custom_control_ctrl.joystick_axis_menu_enter.lower_than
+					if not enter_pressed and active_state then
+						on_enter
+						enter_pressed:=true
+					else
+						enter_pressed:=active_state
+					end
+				end
 			end
 		end
 
@@ -127,6 +314,14 @@ feature {NONE} -- Implementation - Routines
 				start_game:=false
 				is_quitting:=true
 			end
+			if theme_ctrl.is_sound_menu_move then
+				sound_source.stop
+				sound_move.restart
+				sound_source.queue_sound (sound_move)
+				sound_source.play
+			end
+
+			update_screen
 		end
 
 	move_down
@@ -150,6 +345,25 @@ feature {NONE} -- Implementation - Routines
 				is_quitting:=false
 				start_game:=true
 			end
+			if theme_ctrl.is_sound_menu_move then
+				sound_source.stop
+				sound_move.restart
+				sound_source.queue_sound (sound_move)
+				sound_source.play
+			end
+			update_screen
+		end
+
+	on_enter
+		do
+			if theme_ctrl.is_sound_menu_enter then
+				sound_source.stop
+				sound_enter.restart
+				sound_source.queue_sound (sound_enter)
+				sound_source.play
+				stop_on_enter_sound_finish:=true
+			end
+			lib_ctrl.stop
 		end
 
 	update_screen
@@ -158,6 +372,7 @@ feature {NONE} -- Implementation - Routines
 			if resume_enable then
 				lib_ctrl.screen_surface.print_surface_on_surface (bk_surface, 0, 0)
 			else
+				tetris_ctrl.print_screen
 				lib_ctrl.screen_surface.print_surface_on_surface (tetris_ctrl.screen_surface, 0, 0)
 			end
 			lib_ctrl.screen_surface.print_surface_on_surface (fg_surface, 0, 0)
@@ -189,10 +404,9 @@ feature {NONE} -- Implementation - Routines
 			lib_ctrl.flip_screen
 		end
 
+
 feature {NONE} -- Implementation - Variables
 
-
-	mem:MEMORY
 	init_ctrl:INIT_CONTROLLER
 	theme_ctrl:THEME_CONTROLLER
 	lib_ctrl:GAME_LIB_CONTROLLER
@@ -201,7 +415,19 @@ feature {NONE} -- Implementation - Variables
 	fg_surface:GAME_SURFACE
 	arrow_surface:GAME_SURFACE
 	arrow_mirror_surface:GAME_SURFACE
+	is_animate:BOOLEAN
 
 	resume_enable:BOOLEAN
+
+	last_tick:NATURAL
+
+	back_pressed, up_pressed, down_pressed, enter_pressed:BOOLEAN
+
+	sound_source:GAME_AUDIO_SOURCE
+	sound_move:GAME_AUDIO_SOUND
+	sound_enter:GAME_AUDIO_SOUND
+
+	stop_on_enter_sound_finish:BOOLEAN
+
 
 end

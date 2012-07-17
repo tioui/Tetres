@@ -24,7 +24,6 @@ feature {NONE} -- Initialization
 			create blocks_surface.make (l_theme_ctrl.blocks_file_name)
 			screen_surface:=lib_ctrl.screen_surface
 			create bg_surface.make (theme_ctrl.bg_file_name)
-
 			create tetrominos_fact.make (blocks_surface, theme_ctrl.block_width, theme_ctrl.block_height,theme_ctrl.block_rotation)
 			if init_ctrl.is_ghost_show then
 				create tetrominos_fact_ghost.make_with_alpha (blocks_surface, theme_ctrl.block_width, theme_ctrl.block_height,theme_ctrl.block_rotation,theme_ctrl.ghost_alpha)
@@ -43,10 +42,51 @@ feature {NONE} -- Initialization
 			is_game_over:=false
 			create mem
 			create text_color.make_from_hex_string_rgb (theme_ctrl.font_color)
-			event_controller.on_key_down.extend (agent on_key_press)
-			event_controller.on_key_up.extend (agent on_key_up)
+			if init_ctrl.custom_control_enable then
+				if init_ctrl.custom_control_ctrl.keyboard_enable then
+					event_controller.on_key_down.extend (agent custom_keyboard_press)
+					event_controller.on_key_up.extend (agent custom_keyboard_up)
+				end
+				if init_ctrl.custom_control_ctrl.joystick_enable then
+					event_controller.enable_joystick_event
+					if init_ctrl.custom_control_ctrl.joystick_buttons_enable then
+						event_controller.on_joystick_button_pressed.extend (agent custom_joystick_button_press)
+						event_controller.on_joystick_button_released.extend (agent custom_joystick_button_release)
+					end
+					if init_ctrl.custom_control_ctrl.joystick_axis_enable then
+						event_controller.on_joystick_axis_change.extend (agent custom_joystick_axis_change)
+					end
+				end
+
+			else
+				event_controller.on_key_down.extend (agent default_key_press)
+				event_controller.on_key_up.extend (agent on_key_up)
+			end
 			event_controller.on_tick.extend(agent on_tick)
 			event_controller.on_quit_signal.extend(agent on_quit)
+			play_sound:=theme_ctrl.is_sound_enable
+			if play_sound then
+				lib_ctrl.source_add
+				sound_source:=lib_ctrl.source_get_last_add
+				if theme_ctrl.is_sound_game_drop then
+					create {GAME_AUDIO_SOUND_FILE} sound_drop.make(theme_ctrl.sound_game_drop_file)
+				end
+				if theme_ctrl.is_sound_game_rotation then
+					create {GAME_AUDIO_SOUND_FILE} sound_rotation.make(theme_ctrl.sound_game_rotation_file)
+				end
+				if theme_ctrl.is_sound_game_move then
+					create {GAME_AUDIO_SOUND_FILE} sound_move.make(theme_ctrl.sound_game_move_file)
+				end
+				if theme_ctrl.is_sound_game_down then
+					create {GAME_AUDIO_SOUND_FILE} sound_down.make(theme_ctrl.sound_game_down_file)
+				end
+				if theme_ctrl.is_sound_game_anim then
+					create {GAME_AUDIO_SOUND_FILE} sound_anim.make(theme_ctrl.sound_game_anim_file)
+				end
+				if theme_ctrl.is_sound_game_collapse then
+					create {GAME_AUDIO_SOUND_FILE} sound_collapse.make(theme_ctrl.sound_game_collapse_file)
+				end
+			end
 			down_delay:=1000
 			is_hold_used:=false
 			nb_lines:=0
@@ -73,6 +113,17 @@ feature -- Access
 	resume
 		do
 			lib_ctrl.replace_event_controller (event_controller)
+			left_pressed:=false
+			right_pressed:=false
+			down_pressed:=false
+			rotate_left_pressed:=false
+			rotate_right_pressed:=false
+			drop_pressed:=false
+			pause_pressed:=false
+			hold_pressed:=false
+			if play_sound and then sound_source.is_pause then
+				sound_source.play
+			end
 		end
 
 	is_game_over:BOOLEAN
@@ -91,49 +142,36 @@ feature {NONE} -- Implementation - Routines
 				if not is_init then
 					down_tick_number:=lib_ctrl.get_ticks
 					is_init:=true
+					update_screen
 				elseif down_pressed and then lib_ctrl.get_ticks>down_tick_number+30 then
 					down_tick_number:=lib_ctrl.get_ticks
-					go_down
+					go_down(true)
+					update_screen
 				elseif lib_ctrl.get_ticks>down_tick_number+down_delay then
 					down_tick_number:=lib_ctrl.get_ticks
-					go_down
+					go_down(true)
+					update_screen
 				elseif left_pressed and then lib_ctrl.get_ticks>move_tick_number+move_delay then
 					move_tick_number:=lib_ctrl.get_ticks
 					move_delay:=30
 					move_left
+					update_screen
 				elseif right_pressed and then lib_ctrl.get_ticks>move_tick_number+move_delay then
 					move_tick_number:=lib_ctrl.get_ticks
 					move_delay:=30
 					move_right
+					update_screen
 				end
-				update_screen
+
 			end
 
-		end
-
-
-	cont_anim
-		local
-			l_ticks:NATURAL
-		do
-			l_ticks:=lib_ctrl.get_ticks
-			if l_ticks>=anim_start+(theme_ctrl.lines_anim_delay*theme_ctrl.lines_anim_step) then
-				anim_current_value:=theme_ctrl.lines_anim_delay
-				update_screen
-				anim_in_progress:=false
-				pfield.delete_full_line
-				mem.full_collect
-			else
-				anim_current_value:=(l_ticks-anim_start)//theme_ctrl.lines_anim_step
-				if anim_current_value=theme_ctrl.lines_anim_delay//2 then
-					pfield.remove_full_lines_block
-				end
-				update_screen
-			end
 		end
 
 	on_quit
 		do
+			if theme_ctrl.is_sound_enable and then sound_source.is_playing then
+				sound_source.pause
+			end
 			lib_ctrl.stop
 			create last_image_surface.make (screen_surface.width, screen_surface.height, screen_surface.bits_per_pixel, false)
 			last_image_surface.print_surface_on_surface (bg_surface, 0, 0)
@@ -148,20 +186,12 @@ feature {NONE} -- Implementation - Routines
 			end
 		end
 
-	on_key_press(keyboard_event:GAME_KEYBOARD_EVENT)
-		local
-			old_tetromino:TETROMINO
+	default_key_press(keyboard_event:GAME_KEYBOARD_EVENT)
 		do
 			if keyboard_event.is_left_key then
-				move_left
-				move_delay:=300
-				move_tick_number:=lib_ctrl.get_ticks
-				left_pressed:=true
+				start_move_left
 			elseif keyboard_event.is_right_key then
-				move_right
-				move_delay:=300
-				move_tick_number:=lib_ctrl.get_ticks
-				right_pressed:=true
+				start_move_right
 			elseif keyboard_event.is_down_key then
 				down_pressed:=true
 			elseif keyboard_event.is_a_key then
@@ -169,23 +199,84 @@ feature {NONE} -- Implementation - Routines
 			elseif keyboard_event.is_s_key then
 				rotate_right
 			elseif keyboard_event.is_up_key then
-				from
-					old_tetromino:=currents_tetrominos.first
-				until
-					old_tetromino/=currents_tetrominos.first
-				loop
-					go_down
-				end
+				drop
 			elseif keyboard_event.is_escape_key then
 				on_quit
 			elseif keyboard_event.is_tab_key then
-				if theme_ctrl.hold_field_show then
-					hold_tetromino
-				end
-
+				hold
 			end
 			update_screen
 		end
+
+	custom_keyboard_press(keyboard_event:GAME_KEYBOARD_EVENT)
+		do
+			if not left_pressed and keyboard_event.scancode = init_ctrl.custom_control_ctrl.keyboard_game_left then
+				start_move_left
+				update_screen
+			elseif not right_pressed and keyboard_event.scancode = init_ctrl.custom_control_ctrl.keyboard_game_right then
+				start_move_right
+				update_screen
+			elseif not down_pressed and keyboard_event.scancode = init_ctrl.custom_control_ctrl.keyboard_game_down then
+				down_pressed:=true
+			elseif not rotate_left_pressed and keyboard_event.scancode = init_ctrl.custom_control_ctrl.keyboard_game_rotate_left then
+				rotate_left
+				update_screen
+				rotate_left_pressed:=true
+			elseif not rotate_right_pressed and keyboard_event.scancode = init_ctrl.custom_control_ctrl.keyboard_game_rotate_right then
+				rotate_right
+				update_screen
+				rotate_right_pressed:=true
+			elseif not drop_pressed and keyboard_event.scancode = init_ctrl.custom_control_ctrl.keyboard_game_drop then
+				drop
+				update_screen
+				drop_pressed:=true
+			elseif not pause_pressed and keyboard_event.scancode = init_ctrl.custom_control_ctrl.keyboard_game_pause then
+				on_quit
+				pause_pressed:=true
+			elseif not hold_pressed and keyboard_event.scancode = init_ctrl.custom_control_ctrl.keyboard_game_hold then
+				hold
+				update_screen
+				hold_pressed:=true
+			end
+
+		end
+
+	custom_joystick_button_press(button_id,device_id:NATURAL_8)
+		do
+			if device_id=init_ctrl.custom_control_ctrl.joystick_device_id then
+				if not left_pressed and button_id = init_ctrl.custom_control_ctrl.joystick_button_game_left then
+					start_move_left
+					update_screen
+				elseif not right_pressed and button_id = init_ctrl.custom_control_ctrl.joystick_button_game_right then
+					start_move_right
+					update_screen
+				elseif not down_pressed and button_id = init_ctrl.custom_control_ctrl.joystick_button_game_down then
+					down_pressed:=true
+				elseif not rotate_left_pressed and button_id = init_ctrl.custom_control_ctrl.joystick_button_game_rotate_left then
+					rotate_left
+					update_screen
+					rotate_left_pressed:=true
+				elseif not rotate_right_pressed and button_id = init_ctrl.custom_control_ctrl.joystick_button_game_rotate_right then
+					rotate_right
+					update_screen
+					rotate_right_pressed:=true
+				elseif not drop_pressed and button_id = init_ctrl.custom_control_ctrl.joystick_button_game_drop then
+					drop
+					update_screen
+					drop_pressed:=true
+				elseif not pause_pressed and button_id = init_ctrl.custom_control_ctrl.joystick_button_game_pause then
+					on_quit
+					pause_pressed:=true
+				elseif not hold_pressed and button_id = init_ctrl.custom_control_ctrl.joystick_button_game_hold then
+					hold
+					update_screen
+					hold_pressed:=true
+				end
+			end
+
+		end
+
+
 
 	on_key_up(keyboard_event:GAME_KEYBOARD_EVENT)
 		do
@@ -198,16 +289,194 @@ feature {NONE} -- Implementation - Routines
 			end
 		end
 
+	custom_keyboard_up(keyboard_event:GAME_KEYBOARD_EVENT)
+		do
+			if keyboard_event.scancode = init_ctrl.custom_control_ctrl.keyboard_game_left then
+				left_pressed:=false
+			elseif keyboard_event.scancode = init_ctrl.custom_control_ctrl.keyboard_game_right then
+				right_pressed:=false
+			elseif keyboard_event.scancode = init_ctrl.custom_control_ctrl.keyboard_game_down then
+				down_pressed:=false
+			elseif keyboard_event.scancode = init_ctrl.custom_control_ctrl.keyboard_game_rotate_left then
+				rotate_left_pressed:=false
+			elseif keyboard_event.scancode = init_ctrl.custom_control_ctrl.keyboard_game_rotate_right then
+				rotate_right_pressed:=false
+			elseif keyboard_event.scancode = init_ctrl.custom_control_ctrl.keyboard_game_drop then
+				drop_pressed:=false
+			elseif keyboard_event.scancode = init_ctrl.custom_control_ctrl.keyboard_game_pause then
+				pause_pressed:=false
+			elseif keyboard_event.scancode = init_ctrl.custom_control_ctrl.keyboard_game_hold then
+				hold_pressed:=false
+			end
+		end
+
+	custom_joystick_button_release(button_id,device_id:NATURAL_8)
+		do
+			if device_id=init_ctrl.custom_control_ctrl.joystick_device_id then
+				if button_id = init_ctrl.custom_control_ctrl.joystick_button_game_left then
+					left_pressed:=false
+				elseif button_id = init_ctrl.custom_control_ctrl.joystick_button_game_right then
+					right_pressed:=false
+				elseif button_id = init_ctrl.custom_control_ctrl.joystick_button_game_down then
+					down_pressed:=false
+				elseif button_id = init_ctrl.custom_control_ctrl.joystick_button_game_rotate_left then
+					rotate_left_pressed:=false
+				elseif button_id = init_ctrl.custom_control_ctrl.joystick_button_game_rotate_right then
+					rotate_right_pressed:=false
+				elseif button_id = init_ctrl.custom_control_ctrl.joystick_button_game_drop then
+					drop_pressed:=false
+				elseif button_id = init_ctrl.custom_control_ctrl.joystick_button_game_pause then
+					pause_pressed:=false
+				elseif button_id = init_ctrl.custom_control_ctrl.joystick_button_game_hold then
+					hold_pressed:=false
+				end
+			end
+		end
+
+	custom_joystick_axis_change(value:INTEGER_16;axis_id,device_id:NATURAL_8)
+		local
+			active_state:BOOLEAN
+		do
+			if device_id=init_ctrl.custom_control_ctrl.joystick_device_id then
+				if axis_id=init_ctrl.custom_control_ctrl.joystick_axis_game_left.axis_id then
+					active_state:=	value>init_ctrl.custom_control_ctrl.joystick_axis_game_left.upper_than or
+									value<init_ctrl.custom_control_ctrl.joystick_axis_game_left.lower_than
+					if not left_pressed and active_state then
+						start_move_left
+						update_screen
+					else
+						left_pressed:=active_state
+					end
+				end
+				if axis_id=init_ctrl.custom_control_ctrl.joystick_axis_game_right.axis_id then
+					active_state:=	value>init_ctrl.custom_control_ctrl.joystick_axis_game_right.upper_than or
+									value<init_ctrl.custom_control_ctrl.joystick_axis_game_right.lower_than
+					if not right_pressed and active_state then
+						start_move_right
+						update_screen
+					else
+						right_pressed:=active_state
+					end
+				end
+				if axis_id=init_ctrl.custom_control_ctrl.joystick_axis_game_down.axis_id then
+					active_state:=	value>init_ctrl.custom_control_ctrl.joystick_axis_game_down.upper_than or
+									value<init_ctrl.custom_control_ctrl.joystick_axis_game_down.lower_than
+					down_pressed:=active_state
+				end
+				if axis_id=init_ctrl.custom_control_ctrl.joystick_axis_game_rotate_left.axis_id then
+					active_state:=	value>init_ctrl.custom_control_ctrl.joystick_axis_game_rotate_left.upper_than or
+									value<init_ctrl.custom_control_ctrl.joystick_axis_game_rotate_left.lower_than
+					if not rotate_left_pressed and active_state then
+						rotate_left
+						update_screen
+						rotate_left_pressed:=true
+					else
+						rotate_left_pressed:=active_state
+					end
+				end
+				if axis_id=init_ctrl.custom_control_ctrl.joystick_axis_game_rotate_right.axis_id then
+					active_state:=	value>init_ctrl.custom_control_ctrl.joystick_axis_game_rotate_right.upper_than or
+									value<init_ctrl.custom_control_ctrl.joystick_axis_game_rotate_right.lower_than
+					if not rotate_right_pressed and active_state then
+						rotate_right
+						update_screen
+						rotate_right_pressed:=true
+					else
+						rotate_right_pressed:=active_state
+					end
+				end
+				if axis_id=init_ctrl.custom_control_ctrl.joystick_axis_game_drop.axis_id then
+					active_state:=	value>init_ctrl.custom_control_ctrl.joystick_axis_game_drop.upper_than or
+									value<init_ctrl.custom_control_ctrl.joystick_axis_game_drop.lower_than
+					if not drop_pressed and active_state then
+						drop
+						update_screen
+						drop_pressed:=true
+					else
+						drop_pressed:=active_state
+					end
+				end
+				if axis_id=init_ctrl.custom_control_ctrl.joystick_axis_game_pause.axis_id then
+					active_state:=	value>init_ctrl.custom_control_ctrl.joystick_axis_game_pause.upper_than or
+									value<init_ctrl.custom_control_ctrl.joystick_axis_game_pause.lower_than
+					if not pause_pressed and active_state then
+						on_quit
+						pause_pressed:=true
+					else
+						pause_pressed:=active_state
+					end
+				end
+				if axis_id=init_ctrl.custom_control_ctrl.joystick_axis_game_hold.axis_id then
+					active_state:=	value>init_ctrl.custom_control_ctrl.joystick_axis_game_hold.upper_than or
+									value<init_ctrl.custom_control_ctrl.joystick_axis_game_hold.lower_than
+					if not hold_pressed and active_state then
+						hold
+						update_screen
+						hold_pressed:=true
+					else
+						hold_pressed:=active_state
+					end
+				end
+			end
+		end
+
 	rotate_left
 		do
-			currents_tetrominos.first.rotate_left
-			finish_rotation
+			if not anim_in_progress then
+				currents_tetrominos.first.rotate_left
+				finish_rotation
+			end
 		end
 
 	rotate_right
 		do
-			currents_tetrominos.first.rotate_right
-			finish_rotation
+			if not anim_in_progress then
+				currents_tetrominos.first.rotate_right
+				finish_rotation
+			end
+		end
+
+	start_move_left
+		do
+			if not anim_in_progress then
+				move_left
+				move_delay:=300
+				move_tick_number:=lib_ctrl.get_ticks
+				left_pressed:=true
+			end
+
+		end
+
+	start_move_right
+		do
+			if not anim_in_progress then
+				move_right
+				move_delay:=300
+				move_tick_number:=lib_ctrl.get_ticks
+				right_pressed:=true
+			end
+		end
+
+	drop
+		local
+			old_tetromino:TETROMINO
+		do
+			if not anim_in_progress then
+				from
+					old_tetromino:=currents_tetrominos.first
+				until
+					old_tetromino/=currents_tetrominos.first
+				loop
+					go_down(false)
+				end
+			end
+		end
+
+	hold
+		do
+			if theme_ctrl.hold_field_show and not anim_in_progress then
+				hold_tetromino
+			end
 		end
 
 	finish_rotation
@@ -224,34 +493,64 @@ feature {NONE} -- Implementation - Routines
 				currents_tetrominos.first.cancel_last_move
 			end
 			update_ghost
+			if play_sound and then theme_ctrl.is_sound_game_rotation then
+				sound_source.stop
+				sound_rotation.restart
+				sound_source.queue_sound (sound_rotation)
+				sound_source.play
+			end
 		end
 
 	move_left
 		do
-			currents_tetrominos.first.move_left
-			if pfield.detect_collision (currents_tetrominos.first) then
-				currents_tetrominos.first.cancel_last_move
+			if not anim_in_progress then
+				currents_tetrominos.first.move_left
+				finish_move
 			end
-			update_ghost
 		end
 
 	move_right
 		do
-			currents_tetrominos.first.move_right
-			if pfield.detect_collision (currents_tetrominos.first) then
-				currents_tetrominos.first.cancel_last_move
+			if not anim_in_progress then
+				currents_tetrominos.first.move_right
+				finish_move
 			end
-			update_ghost
 		end
 
-	go_down
+	finish_move
 		do
-			currents_tetrominos.first.go_down
 			if pfield.detect_collision (currents_tetrominos.first) then
 				currents_tetrominos.first.cancel_last_move
-				pfield.freeze_tetromino (currents_tetrominos.first)
-				valid_lines
-				change_current_tetromino
+			else
+				update_ghost
+					if play_sound and then theme_ctrl.is_sound_game_move then
+					sound_source.stop
+					sound_move.restart
+					sound_source.queue_sound (sound_move)
+					sound_source.play
+				end
+			end
+		end
+
+	go_down(down_sound:BOOLEAN)
+		do
+			if not anim_in_progress then
+				currents_tetrominos.first.go_down
+				if pfield.detect_collision (currents_tetrominos.first) then
+					currents_tetrominos.first.cancel_last_move
+					pfield.freeze_tetromino (currents_tetrominos.first)
+					valid_lines
+					change_current_tetromino
+					down_tick_number:=lib_ctrl.get_ticks
+				else
+					if play_sound and then down_sound and theme_ctrl.is_sound_game_down then
+						sound_source.stop
+						sound_down.restart
+						sound_source.queue_sound (sound_down)
+						sound_source.play
+					end
+				end
+
 			end
 		end
 
@@ -288,17 +587,64 @@ feature {NONE} -- Implementation - Routines
 				end
 				new_delay:=1050-(50*level)
 				if new_delay<=0 then
-					new_delay:=1
+					new_delay:=50
 				end
+				down_delay:=new_delay.to_natural_32
 				if theme_ctrl.lines_anim_show then
 					pfield.prepare_anim
 					anim_in_progress:=true
 					anim_start:=lib_ctrl.get_ticks
+					if play_sound and then theme_ctrl.is_sound_game_anim then
+						sound_source.stop
+						sound_anim.restart
+						sound_source.queue_sound (sound_anim)
+						sound_source.play
+					end
 				else
-					down_delay:=new_delay.to_natural_32
+					if play_sound and then theme_ctrl.is_sound_game_collapse then
+						sound_source.stop
+						sound_collapse.restart
+						sound_source.queue_sound (sound_collapse)
+						sound_source.play
+					end
 					pfield.delete_full_line
 					mem.full_collect
 				end
+			else
+				if play_sound and then theme_ctrl.is_sound_game_drop then
+					sound_source.stop
+					sound_drop.restart
+					sound_source.queue_sound (sound_drop)
+					sound_source.play
+				end
+			end
+		end
+
+	cont_anim
+		local
+			l_ticks:NATURAL
+		do
+			l_ticks:=lib_ctrl.get_ticks
+			if l_ticks>=anim_start+(theme_ctrl.lines_anim_delay*theme_ctrl.lines_anim_step) then
+				anim_current_value:=theme_ctrl.lines_anim_delay
+				update_screen
+				anim_in_progress:=false
+				pfield.delete_full_line
+				mem.full_collect
+				if play_sound and then theme_ctrl.is_sound_game_collapse then
+					sound_source.stop
+					sound_collapse.restart
+					sound_source.queue_sound (sound_collapse)
+					sound_source.play
+				end
+				update_screen
+				down_tick_number:=lib_ctrl.get_ticks
+			else
+				anim_current_value:=(l_ticks-anim_start)//theme_ctrl.lines_anim_step
+				if anim_current_value=theme_ctrl.lines_anim_delay//2 then
+					pfield.remove_full_lines_block
+				end
+				update_screen
 			end
 		end
 
@@ -388,12 +734,15 @@ feature {NONE} -- Implementation - Routines
 	update_screen
 		do
 			screen_surface.print_surface_on_surface (bg_surface, 0, 0)
-			if init_ctrl.is_ghost_show then
-				update_ghost
-				pfield.print_playfield_with_tetromino_and_ghost (currents_tetrominos.first,current_tetromino_ghost, screen_surface)
-			else
-				pfield.print_playfield_with_tetromino (currents_tetrominos.first,screen_surface)
+			if not anim_in_progress then
+				if init_ctrl.is_ghost_show then
+					update_ghost
+					pfield.print_playfield_with_tetromino_and_ghost (currents_tetrominos.first,current_tetromino_ghost, screen_surface)
+				else
+					pfield.print_playfield_with_tetromino (currents_tetrominos.first,screen_surface)
+				end
 			end
+
 			if theme_ctrl.hold_field_show and holded_tetromino/=Void then
 				holded_tetromino.print_on_surface (screen_surface, theme_ctrl.hold_field_x, theme_ctrl.hold_field_y)
 			end
@@ -413,6 +762,7 @@ feature {NONE} -- Implementation - Routines
 				pfield.print_playfield_with_anim (screen_surface, anim_current_value)
 			end
 			lib_ctrl.flip_screen
+
 		end
 
 	print_level(target_surface:GAME_SURFACE)
@@ -494,7 +844,7 @@ feature {NONE} -- Implementation - Variables
 	current_tetromino_ghost:TETROMINO
 	currents_tetrominos:LINKED_LIST[TETROMINO]
 	holded_tetromino:TETROMINO
-	left_pressed,right_pressed,down_pressed:BOOLEAN
+	left_pressed,right_pressed,down_pressed,drop_pressed,hold_pressed,pause_pressed,rotate_left_pressed,rotate_right_pressed:BOOLEAN
 
 	down_tick_number:NATURAL
 	move_tick_number:NATURAL
@@ -518,7 +868,15 @@ feature {NONE} -- Implementation - Variables
 	anim_start:NATURAL
 	anim_current_value:NATURAL
 
+	sound_source:GAME_AUDIO_SOURCE
+	sound_drop:GAME_AUDIO_SOUND
+	sound_move:GAME_AUDIO_SOUND
+	sound_down:GAME_AUDIO_SOUND
+	sound_rotation:GAME_AUDIO_SOUND
+	sound_anim:GAME_AUDIO_SOUND
+	sound_collapse:GAME_AUDIO_SOUND
 
+	play_sound:BOOLEAN
 
 
 end
