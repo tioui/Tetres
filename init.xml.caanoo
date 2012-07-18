@@ -3,11 +3,11 @@
 	<theme name="lowres"/>
 	<material video_memory="true" double_buffer="false"/>	
 	<ghost show="true"/>
-	<cpf font="false"/>
+	<sound thread="false">
 	<custom_control> 
 		<joystick device_id="0">
 			<buttons menu_enter="2" menu_back="1" game_rotate_left="1" game_rotate_right="2" game_hold="3" game_pause="6"/>
-			<axis menu_up_axis_id="1" menu_up_lower_than="-27000" menu_down_axis_id="1" menu_down_upper_than="27000" menu_left_axis_id="0" menu_left_lower_than="-27000" menu_right_axis_id="0" menu_right_upper_than="27000"game_drop_axis_id="1" game_drop_lower_than="-27000" game_down_axis_id="1" game_down_upper_than="27000" game_left_axis_id="0" game_left_lower_than="-27000" game_right_axis_id="0" game_right_upper_than="27000"/>
+			<axis menu_up_axis_id="1" menu_up_lower_than="-27000" menu_down_axis_id="1" menu_down_upper_than="27000" menu_left_axis_id="0" menu_left_lower_than="-27000" menu_right_axis_id="0" menu_right_upper_than="27000" game_drop_axis_id="1" game_drop_lower_than="-27000" game_down_axis_id="1" game_down_upper_than="27000" game_left_axis_id="0" game_left_lower_than="-27000" game_right_axis_id="0" game_right_upper_than="27000"/>
 		</joystick>
 	</custom_control>
 </init>

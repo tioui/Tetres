@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <init>
 	<theme name="lowres"/>
-	<material video_memory="true" double_buffer="false"/>	
-	<ghost show="true"/>
-	<cpf font="false"/>
+	<material video_memory="true" double_buffer="false"/>
+	<sound thread="false">
 	<custom_control> 
 		<joystick device_id="0">
 			<buttons menu_up="0" menu_down="4" menu_left="2" menu_right="6" menu_enter="13" menu_back="14" game_left="2" game_right="6" game_down="4" game_drop="0" game_rotate_left="14" game_rotate_right="13" game_hold="15" game_pause="8"/>

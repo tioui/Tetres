@@ -3,7 +3,6 @@
 	<theme name="default"/>
 	<material video_memory="true" double_buffer="true"/>	
 	<ghost show="true"/>
-	<cpf font="false"/>
 	<custom_control> 
 		<keyboard menu_up="111" menu_down="116" menu_left="113" menu_right="114" menu_enter="36" menu_back="9" game_left="113" game_right="114" game_down="116" game_drop="111" game_rotate_left="38" game_rotate_right="39" game_hold="23" game_pause="9"/>
 		<joystick device_id="0">
