@@ -41,6 +41,8 @@ feature {NONE} -- Initialization
 		end
 
 	make_default(l_init_ctrl:INIT_CONTROLLER; l_theme_ctrl:THEME_CONTROLLER; l_lib_ctrl:GAME_LIB_CONTROLLER)
+		local
+			music:GAME_AUDIO_SOUND_FILE
 		do
 			init_ctrl:=l_init_ctrl
 			theme_ctrl:=l_theme_ctrl
@@ -70,18 +72,30 @@ feature {NONE} -- Initialization
 			if theme_ctrl.is_sound_enable then
 				lib_ctrl.source_add
 				sound_source:=lib_ctrl.source_get_last_add
+				if theme_ctrl.is_sound_menu_enter then
+					create {GAME_AUDIO_SOUND_FILE} sound_enter.make (theme_ctrl.sound_menu_enter_file)
+				end
+				if theme_ctrl.is_sound_menu_move then
+					create {GAME_AUDIO_SOUND_FILE} sound_move.make (theme_ctrl.sound_menu_move_file)
+				end
+				if theme_ctrl.is_music_menu then
+					lib_ctrl.source_add
+					music_source:=lib_ctrl.source_get_last_add
+					if theme_ctrl.is_music_menu_intro then
+						create music.make (theme_ctrl.music_menu_intro_file)
+						music_source.queue_sound (music)
+					end
+					create music.make (theme_ctrl.music_menu_loop_file)
+					music_source.queue_sound_infinite_loop (music)
+					music_source.play
+				end
 			end
-			if theme_ctrl.is_sound_menu_enter then
-				create {GAME_AUDIO_SOUND_FILE} sound_enter.make (theme_ctrl.sound_menu_enter_file)
-			end
-			if theme_ctrl.is_sound_menu_move then
-				create {GAME_AUDIO_SOUND_FILE} sound_move.make (theme_ctrl.sound_menu_move_file)
-			end
+
 			lib_ctrl.event_controller.on_tick.extend (agent on_tick)
 			is_quitting:=false
 			start_game:=false
 			is_resuming:=false
-			is_settings:=false
+--			is_settings:=false
 			stop_on_enter_sound_finish:=false
 		end
 
@@ -106,13 +120,17 @@ feature -- Access
 
 	is_resuming:BOOLEAN
 
-	is_settings:BOOLEAN
+--	is_settings:BOOLEAN
 
 	dispose
 		do
 			if theme_ctrl.is_sound_enable then
 				sound_source.stop
 				lib_ctrl.sources_remove (sound_source)
+				if theme_ctrl.is_music_menu then
+					music_source.stop
+					lib_ctrl.sources_remove (music_source)
+				end
 			end
 
 		end
@@ -132,7 +150,7 @@ feature {NONE} -- Implementation - Routines
 			is_quitting:=true
 			start_game:=false
 			is_resuming:=false
-			is_settings:=false
+--			is_settings:=false
 			lib_ctrl.stop
 		end
 
@@ -143,7 +161,7 @@ feature {NONE} -- Implementation - Routines
 					is_quitting:=false
 					start_game:=false
 					is_resuming:=true
-					is_settings:=false
+--					is_settings:=false
 					lib_ctrl.stop
 				else
 					on_quit
@@ -165,7 +183,7 @@ feature {NONE} -- Implementation - Routines
 					is_quitting:=false
 					start_game:=false
 					is_resuming:=true
-					is_settings:=false
+--					is_settings:=false
 					lib_ctrl.stop
 				else
 					on_quit
@@ -204,7 +222,7 @@ feature {NONE} -- Implementation - Routines
 						is_quitting:=false
 						start_game:=false
 						is_resuming:=true
-						is_settings:=false
+--						is_settings:=false
 						lib_ctrl.stop
 					else
 						on_quit
@@ -251,7 +269,7 @@ feature {NONE} -- Implementation - Routines
 							is_quitting:=false
 							start_game:=false
 							is_resuming:=true
-							is_settings:=false
+--							is_settings:=false
 							lib_ctrl.stop
 						else
 							on_quit
@@ -298,15 +316,19 @@ feature {NONE} -- Implementation - Routines
 		do
 			if is_quitting then
 				is_quitting:=false
-				is_settings:=true
-			elseif is_settings then
 				if resume_enable then
-					is_settings:=false
 					is_resuming:=true
 				else
-					is_settings:=false
 					start_game:=true
 				end
+--			elseif is_settings then
+--				if resume_enable then
+--					is_settings:=false
+--					is_resuming:=true
+--				else
+--					is_settings:=false
+--					start_game:=true
+--				end
 			elseif is_resuming then
 				is_resuming:=false
 				start_game:=true
@@ -328,19 +350,18 @@ feature {NONE} -- Implementation - Routines
 		do
 			if is_resuming then
 				is_resuming:=false
-				is_settings:=true
+				is_quitting:=true
 			elseif start_game then
+				start_game:=false
 				if resume_enable then
-					start_game:=false
 					is_resuming:=true
 				else
-					start_game:=false
-					is_settings:=true
+					is_quitting:=true
 				end
 
-			elseif is_settings then
-				is_settings:=false
-				is_quitting:=true
+--			elseif is_settings then
+--				is_settings:=false
+--				is_quitting:=true
 			elseif is_quitting then
 				is_quitting:=false
 				start_game:=true
@@ -388,12 +409,12 @@ feature {NONE} -- Implementation - Routines
 				else
 					lib_ctrl.screen_surface.print_surface_on_surface (arrow_surface,theme_ctrl.menu_resume_x,theme_ctrl.menu_resume_y)
 				end
-			elseif is_settings then
-				if theme_ctrl.menu_settings_mirror then
-					lib_ctrl.screen_surface.print_surface_on_surface (arrow_mirror_surface,theme_ctrl.menu_settings_x,theme_ctrl.menu_settings_y)
-				else
-					lib_ctrl.screen_surface.print_surface_on_surface (arrow_surface,theme_ctrl.menu_settings_x,theme_ctrl.menu_settings_y)
-				end
+--			elseif is_settings then
+--				if theme_ctrl.menu_settings_mirror then
+--					lib_ctrl.screen_surface.print_surface_on_surface (arrow_mirror_surface,theme_ctrl.menu_settings_x,theme_ctrl.menu_settings_y)
+--				else
+--					lib_ctrl.screen_surface.print_surface_on_surface (arrow_surface,theme_ctrl.menu_settings_x,theme_ctrl.menu_settings_y)
+--				end
 			elseif is_quitting then
 				if theme_ctrl.menu_quit_mirror then
 					lib_ctrl.screen_surface.print_surface_on_surface (arrow_mirror_surface,theme_ctrl.menu_quit_x,theme_ctrl.menu_quit_y)
@@ -428,6 +449,8 @@ feature {NONE} -- Implementation - Variables
 	sound_enter:GAME_AUDIO_SOUND
 
 	stop_on_enter_sound_finish:BOOLEAN
+
+	music_source:GAME_AUDIO_SOURCE
 
 
 end

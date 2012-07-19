@@ -31,16 +31,27 @@ feature {NONE} -- Initialization
 			temp_surface:GAME_SURFACE
 			is_resume:BOOLEAN
 			mem:MEMORY
+			title_tick:NATURAL
 		do
 			create mem
 			ressource_cpf:=create_cpf
 			if ressource_cpf/=Void then
 				create init_ctrl.make
 				if not init_ctrl.has_error then
-
 					create theme_ctrl.make (init_ctrl.theme_name)
 					if not theme_ctrl.has_error then
 						lib_ctrl.enable_video
+						create icon_trans_color.make_rgb (255,0,255)
+						width:=theme_ctrl.width
+						height:=theme_ctrl.height
+						lib_ctrl.create_screen_surface_with_icon_cpf (
+													ressource_cpf, 1, icon_trans_color, width.to_integer_32, height.to_integer_32,
+													theme_ctrl.bpp.to_integer_32, init_ctrl.is_material_video_memory, init_ctrl.is_material_double_buffer,
+													false, true, theme_ctrl.fullscreen)
+						if theme_ctrl.is_title_screen then
+							show_title(theme_ctrl,lib_ctrl)
+							title_tick:=lib_ctrl.get_ticks
+						end
 						if theme_ctrl.is_sound_enable then
 							lib_ctrl.enable_sound
 							if init_ctrl.is_sound_thread then
@@ -60,13 +71,6 @@ feature {NONE} -- Initialization
 								io.error.flush
 							end
 						end
-						create icon_trans_color.make_rgb (255,0,255)
-						width:=theme_ctrl.width
-						height:=theme_ctrl.height
-						lib_ctrl.create_screen_surface_with_icon_cpf (
-													ressource_cpf, 1, icon_trans_color, width.to_integer_32, height.to_integer_32,
-													theme_ctrl.bpp.to_integer_32, init_ctrl.is_material_video_memory, init_ctrl.is_material_double_buffer,
-													false, true, theme_ctrl.fullscreen)
 						from
 							quitting:=false
 							is_resume:=false
@@ -74,6 +78,12 @@ feature {NONE} -- Initialization
 						until
 							quitting
 						loop
+							if theme_ctrl.is_title_screen then
+								from
+								until title_tick+theme_ctrl.title_delay<lib_ctrl.get_ticks
+								loop
+								end
+							end
 							show_menu(is_resume,temp_surface,init_ctrl, theme_ctrl, lib_ctrl)
 							lib_ctrl.clear_event_controller
 							mem.full_collect
@@ -105,6 +115,15 @@ feature {NONE} -- Initialization
 					end
 				end
 			end
+		end
+
+	show_title(l_theme_ctrl:THEME_CONTROLLER; l_lib_ctrl:GAME_LIB_CONTROLLER)
+		local
+			title_surface:GAME_SURFACE_IMG_FILE
+		do
+			create title_surface.make (l_theme_ctrl.title_file_name)
+			l_lib_ctrl.screen_surface.print_surface_on_surface (title_surface, 0, 0)
+			l_lib_ctrl.flip_screen
 		end
 
 	show_menu(is_resume:BOOLEAN;l_surface:GAME_SURFACE;l_init_ctrl:INIT_CONTROLLER; l_theme_ctrl:THEME_CONTROLLER; l_lib_ctrl:GAME_LIB_CONTROLLER)

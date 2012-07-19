@@ -63,6 +63,8 @@ feature {NONE} -- Initialization
 			menu_resume_file_name:=directory_name+"menu-resume.bmp"
 			game_over_file_name:=directory_name+"game-over.bmp"
 			lines_anim_file_name:=directory_name+"lines_anim.bmp"
+			is_title_screen:=false
+			title_delay:=2000
 			menu_resume_mirror:=false
 			menu_new_game_mirror:=false
 			menu_settings_mirror:=false
@@ -87,6 +89,10 @@ feature {NONE} -- Initialization
 			is_sound_game_anim:=false
 			is_sound_game_collapse:=false
 			is_sound_game_down:=false
+			is_music_game:=false
+			is_music_game_intro:=false
+			is_music_menu:=false
+			is_music_menu_intro:=false
 		end
 
 	process_document(document:XML_DOCUMENT)
@@ -135,6 +141,8 @@ feature {NONE} -- Initialization
 				process_level_element(element)
 			elseif element.name.is_equal ("lines_anim") then
 				process_lines_anim_element(element)
+			elseif element.name.is_equal ("title") then
+				process_title_element(element)
 			end
 		end
 
@@ -209,6 +217,25 @@ feature {NONE} -- Initialization
 					end
 				elseif attributes.item_for_iteration.name.is_equal ("color") then
 					font_color:=attributes.item_for_iteration.value
+				end
+				attributes.forth
+			end
+		end
+
+	process_title_element(element:XML_ELEMENT)
+		local
+			attributes:LIST[XML_ATTRIBUTE]
+		do
+			attributes:=element.attributes
+			from
+				attributes.start
+			until
+				attributes.off
+			loop
+				if attributes.item_for_iteration.name.is_equal ("delay") then
+					if attributes.item_for_iteration.value.is_natural then
+						title_delay:=attributes.item_for_iteration.value.to_natural
+					end
 				end
 				attributes.forth
 			end
@@ -451,6 +478,9 @@ feature {NONE} -- Initialization
 					menu_resume_file_name:=directory_name+attributes.item_for_iteration.value
 				elseif attributes.item_for_iteration.name.is_equal ("game_over")then
 					game_over_file_name:=directory_name+attributes.item_for_iteration.value
+				elseif attributes.item_for_iteration.name.is_equal ("title")then
+					is_title_screen:=true
+					title_file_name:=directory_name+attributes.item_for_iteration.value
 				elseif attributes.item_for_iteration.name.is_equal ("lines_anim")then
 					lines_anim_file_name:=directory_name+attributes.item_for_iteration.value
 				elseif attributes.item_for_iteration.name.is_equal ("sound_menu_move")then
@@ -485,6 +515,22 @@ feature {NONE} -- Initialization
 					is_sound_game_collapse:=true
 					is_sound_enable:=true
 					sound_game_collapse_file:=directory_name+attributes.item_for_iteration.value
+				elseif attributes.item_for_iteration.name.is_equal ("music_game_loop")then
+					is_music_game:=true
+					is_sound_enable:=true
+					music_game_loop_file:=directory_name+attributes.item_for_iteration.value
+				elseif attributes.item_for_iteration.name.is_equal ("music_game_intro")then
+					is_music_game_intro:=true
+					is_sound_enable:=true
+					music_game_intro_file:=directory_name+attributes.item_for_iteration.value
+				elseif attributes.item_for_iteration.name.is_equal ("music_menu_loop")then
+					is_music_menu:=true
+					is_sound_enable:=true
+					music_menu_loop_file:=directory_name+attributes.item_for_iteration.value
+				elseif attributes.item_for_iteration.name.is_equal ("music_menu_intro")then
+					is_music_menu_intro:=true
+					is_sound_enable:=true
+					music_menu_intro_file:=directory_name+attributes.item_for_iteration.value
 				end
 				attributes.forth
 			end
@@ -547,8 +593,6 @@ feature {NONE} -- Initialization
 			is_resume_y_set:=false
 			is_new_game_x_set:=false
 			is_new_game_y_set:=false
-			is_settings_x_set:=false
-			is_settings_y_set:=false
 			is_quit_x_set:=false
 			is_quit_y_set:=false
 			attributes:=element.attributes
@@ -576,16 +620,6 @@ feature {NONE} -- Initialization
 					if attributes.item_for_iteration.value.is_integer then
 						menu_new_game_y:=attributes.item_for_iteration.value.to_integer
 						is_new_game_y_set:=true
-					end
-				elseif attributes.item_for_iteration.name.is_equal ("settings_x") then
-					if attributes.item_for_iteration.value.is_integer then
-						menu_settings_x:=attributes.item_for_iteration.value.to_integer
-						is_settings_x_set:=true
-					end
-				elseif attributes.item_for_iteration.name.is_equal ("settings_y") then
-					if attributes.item_for_iteration.value.is_integer then
-						menu_settings_y:=attributes.item_for_iteration.value.to_integer
-						is_settings_y_set:=true
 					end
 				elseif attributes.item_for_iteration.name.is_equal ("quit_x") then
 					if attributes.item_for_iteration.value.is_integer then
@@ -615,7 +649,7 @@ feature {NONE} -- Initialization
 
 
 			is_menu_set:=	is_resume_x_set and is_resume_y_set and is_new_game_x_set and is_new_game_y_set and
-							is_settings_x_set and is_settings_y_set and is_quit_x_set and is_quit_y_set
+							is_quit_x_set and is_quit_y_set
 		end
 
 feature -- Access
@@ -625,6 +659,7 @@ feature -- Access
 	is_playfield_set:BOOLEAN
 	is_next_field_set:BOOLEAN
 	is_menu_set:BOOLEAN
+	is_title_screen:BOOLEAN
 
 	name:STRING
 	width:NATURAL
@@ -651,7 +686,9 @@ feature -- Access
 	arrow_file_name:STRING
 	game_over_file_name:STRING
 	lines_anim_file_name:STRING
+	title_file_name:STRING
 
+	title_delay:NATURAL
 
 	ghost_alpha:NATURAL_8
 
@@ -659,8 +696,6 @@ feature -- Access
 	menu_resume_y:INTEGER
 	menu_new_game_x:INTEGER
 	menu_new_game_y:INTEGER
-	menu_settings_x:INTEGER
-	menu_settings_y:INTEGER
 	menu_quit_x:INTEGER
 	menu_quit_y:INTEGER
 	menu_resume_mirror:BOOLEAN
@@ -720,6 +755,16 @@ feature -- Access
 	sound_game_anim_file:STRING
 	is_sound_game_collapse:BOOLEAN
 	sound_game_collapse_file:STRING
+
+	is_music_game:BOOLEAN
+	is_music_game_intro:BOOLEAN
+	music_game_intro_file:STRING
+	music_game_loop_file:STRING
+
+	is_music_menu:BOOLEAN
+	is_music_menu_intro:BOOLEAN
+	music_menu_intro_file:STRING
+	music_menu_loop_file:STRING
 
 feature -- Error handelling
 

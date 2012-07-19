@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <theme name="Low Resolution" width="320" height="240" bpp="16">
-	<files game_over="game-over.png" arrow="arrow.png" blocks="blocks.png" bg="bg.png" font="font.ttf" menu_init="menu-init.png" menu_resume="menu-resume.png" lines_anim="anim.png" sound_menu_move="menu-move.wav" sound_menu_enter="menu-enter.wav" sound_game_rotation="rotation.wav" sound_game_drop="drop.wav" sound_game_move="game-move.wav" sound_game_down="game-move.wav" sound_game_anim="anim.wav" sound_game_collapse="drop.wav"/>
-	<menu bg_alpha="50" resume_x="110" resume_y="82" new_game_x="172" new_game_y="28" settings_x="140" settings_y="140" quit_x="108" quit_y="194" new_game_mirror="true" settings_mirror="true"/>
+	<files game_over="game-over.png" arrow="arrow.png" blocks="blocks.png" bg="bg.png" font="font.ttf" menu_init="menu-init.png" menu_resume="menu-resume.png" lines_anim="anim.png" title="title.png" sound_menu_move="menu-move.wav" sound_menu_enter="menu-enter.wav" sound_game_rotation="rotation.wav" sound_game_drop="drop.wav" sound_game_move="game-move.wav" sound_game_down="game-move.wav" sound_game_anim="anim.wav" sound_game_collapse="drop.wav" music_game_loop="game-music.ogg"/>
+	<menu bg_alpha="50" resume_x="90" resume_y="170" new_game_x="90" new_game_y="140" quit_x="90" quit_y="200"/>
 	<block width="10" height="10" rotation="false"/>
 	<next_field show="true" x="184" y="46" vertical="false" padding="10" nb_tetrominos="3"/>
 	<hold_field show="true" x="14" y="44" />
@@ -12,5 +12,5 @@
 	<lines_anim show="true" delay="50" step="10"/>
 	<ghost alpha="100"/>
 	<game_over time="2000"/>
-	<font size="21" color="FFFFFF"/>
+	<font size="21" color="FFFFFF"/> 
 </theme>

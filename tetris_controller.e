@@ -16,6 +16,7 @@ feature {NONE} -- Initialization
 			-- Initialization for `Current'.
 		local
 			anim_surface:GAME_SURFACE_IMG_FILE
+			music:GAME_AUDIO_SOUND_FILE
 		do
 			init_ctrl:=l_init_ctrl
 			theme_ctrl:=l_theme_ctrl
@@ -86,6 +87,17 @@ feature {NONE} -- Initialization
 				if theme_ctrl.is_sound_game_collapse then
 					create {GAME_AUDIO_SOUND_FILE} sound_collapse.make(theme_ctrl.sound_game_collapse_file)
 				end
+				if theme_ctrl.is_music_game then
+					lib_ctrl.source_add
+					music_source:=lib_ctrl.source_get_last_add
+					if theme_ctrl.is_music_game_intro then
+						create music.make (theme_ctrl.music_game_intro_file)
+						music_source.queue_sound (music)
+					end
+					create music.make (theme_ctrl.music_game_loop_file)
+					music_source.queue_sound_infinite_loop (music)
+					music_source.play
+				end
 			end
 			down_delay:=1000
 			is_hold_used:=false
@@ -121,9 +133,13 @@ feature -- Access
 			drop_pressed:=false
 			pause_pressed:=false
 			hold_pressed:=false
-			if play_sound and then sound_source.is_pause then
-				sound_source.play
+			if play_sound then
+				if sound_source.is_pause then
+					sound_source.play
+				end
+				music_source.play
 			end
+
 		end
 
 	is_game_over:BOOLEAN
@@ -169,9 +185,13 @@ feature {NONE} -- Implementation - Routines
 
 	on_quit
 		do
-			if theme_ctrl.is_sound_enable and then sound_source.is_playing then
-				sound_source.pause
+			if play_sound then
+				if sound_source.is_playing then
+					sound_source.pause
+				end
+				music_source.pause
 			end
+
 			lib_ctrl.stop
 			create last_image_surface.make (screen_surface.width, screen_surface.height, screen_surface.bits_per_pixel, false)
 			last_image_surface.print_surface_on_surface (bg_surface, 0, 0)
@@ -877,6 +897,9 @@ feature {NONE} -- Implementation - Variables
 	sound_collapse:GAME_AUDIO_SOUND
 
 	play_sound:BOOLEAN
+
+	music_source:GAME_AUDIO_SOURCE
+
 
 
 end
