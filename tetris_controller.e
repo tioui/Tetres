@@ -12,15 +12,16 @@ create
 
 feature {NONE} -- Initialization
 
-	make(l_init_ctrl:INIT_CONTROLLER; l_theme_ctrl:THEME_CONTROLLER; l_lib_ctrl:GAME_LIB_CONTROLLER)
+	make(l_init_ctrl:INIT_CONTROLLER; l_theme_ctrl:THEME_CONTROLLER; l_lib_ctrl:GAME_LIB_CONTROLLER;l_audio_ctrl:AUDIO_CONTROLLER)
 			-- Initialization for `Current'.
 		local
 			anim_surface:GAME_SURFACE_IMG_FILE
-			music:GAME_AUDIO_SOUND_FILE
+			music:AUDIO_SOUND_SND_FILE
 		do
 			init_ctrl:=l_init_ctrl
 			theme_ctrl:=l_theme_ctrl
 			lib_ctrl:=l_lib_ctrl
+			audio_ctrl:=l_audio_ctrl
 			event_controller:=l_lib_ctrl.event_controller
 			create blocks_surface.make (l_theme_ctrl.blocks_file_name)
 			screen_surface:=lib_ctrl.screen_surface
@@ -67,29 +68,29 @@ feature {NONE} -- Initialization
 			event_controller.on_quit_signal.extend(agent on_quit)
 			play_sound:=theme_ctrl.is_sound_enable
 			if play_sound then
-				lib_ctrl.source_add
-				sound_source:=lib_ctrl.source_get_last_add
+				audio_ctrl.source_add
+				sound_source:=audio_ctrl.source_get_last_add
 				if theme_ctrl.is_sound_game_drop then
-					create {GAME_AUDIO_SOUND_FILE} sound_drop.make(theme_ctrl.sound_game_drop_file)
+					create {AUDIO_SOUND_SND_FILE} sound_drop.make(theme_ctrl.sound_game_drop_file)
 				end
 				if theme_ctrl.is_sound_game_rotation then
-					create {GAME_AUDIO_SOUND_FILE} sound_rotation.make(theme_ctrl.sound_game_rotation_file)
+					create {AUDIO_SOUND_SND_FILE} sound_rotation.make(theme_ctrl.sound_game_rotation_file)
 				end
 				if theme_ctrl.is_sound_game_move then
-					create {GAME_AUDIO_SOUND_FILE} sound_move.make(theme_ctrl.sound_game_move_file)
+					create {AUDIO_SOUND_SND_FILE} sound_move.make(theme_ctrl.sound_game_move_file)
 				end
 				if theme_ctrl.is_sound_game_down then
-					create {GAME_AUDIO_SOUND_FILE} sound_down.make(theme_ctrl.sound_game_down_file)
+					create {AUDIO_SOUND_SND_FILE} sound_down.make(theme_ctrl.sound_game_down_file)
 				end
 				if theme_ctrl.is_sound_game_anim then
-					create {GAME_AUDIO_SOUND_FILE} sound_anim.make(theme_ctrl.sound_game_anim_file)
+					create {AUDIO_SOUND_SND_FILE} sound_anim.make(theme_ctrl.sound_game_anim_file)
 				end
 				if theme_ctrl.is_sound_game_collapse then
-					create {GAME_AUDIO_SOUND_FILE} sound_collapse.make(theme_ctrl.sound_game_collapse_file)
+					create {AUDIO_SOUND_SND_FILE} sound_collapse.make(theme_ctrl.sound_game_collapse_file)
 				end
 				if theme_ctrl.is_music_game then
-					lib_ctrl.source_add
-					music_source:=lib_ctrl.source_get_last_add
+					audio_ctrl.source_add
+					music_source:=audio_ctrl.source_get_last_add
 					if theme_ctrl.is_music_game_intro then
 						create music.make (theme_ctrl.music_game_intro_file)
 						music_source.queue_sound (music)
@@ -850,6 +851,7 @@ feature {NONE} -- Implementation - Variables
 	init_ctrl:INIT_CONTROLLER
 	theme_ctrl:THEME_CONTROLLER
 	lib_ctrl:GAME_LIB_CONTROLLER
+	audio_ctrl:AUDIO_CONTROLLER
 	event_controller:GAME_EVENT_CONTROLLER
 	rnd_bag:RANDOM_BAG
 	blocks_surface:GAME_SURFACE_IMG_FILE
@@ -888,17 +890,17 @@ feature {NONE} -- Implementation - Variables
 	anim_start:NATURAL
 	anim_current_value:NATURAL
 
-	sound_source:GAME_AUDIO_SOURCE
-	sound_drop:GAME_AUDIO_SOUND
-	sound_move:GAME_AUDIO_SOUND
-	sound_down:GAME_AUDIO_SOUND
-	sound_rotation:GAME_AUDIO_SOUND
-	sound_anim:GAME_AUDIO_SOUND
-	sound_collapse:GAME_AUDIO_SOUND
+	sound_source:AUDIO_SOURCE
+	sound_drop:AUDIO_SOUND
+	sound_move:AUDIO_SOUND
+	sound_down:AUDIO_SOUND
+	sound_rotation:AUDIO_SOUND
+	sound_anim:AUDIO_SOUND
+	sound_collapse:AUDIO_SOUND
 
 	play_sound:BOOLEAN
 
-	music_source:GAME_AUDIO_SOURCE
+	music_source:AUDIO_SOURCE
 
 
 

@@ -583,8 +583,6 @@ feature {NONE} -- Initialization
 			is_resume_y_set:BOOLEAN
 			is_new_game_x_set:BOOLEAN
 			is_new_game_y_set:BOOLEAN
-			is_settings_x_set:BOOLEAN
-			is_settings_y_set:BOOLEAN
 			is_quit_x_set:BOOLEAN
 			is_quit_y_set:BOOLEAN
 			attributes:LIST[XML_ATTRIBUTE]

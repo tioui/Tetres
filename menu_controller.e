@@ -14,10 +14,10 @@ create
 
 feature {NONE} -- Initialization
 
-	make(l_init_ctrl:INIT_CONTROLLER; l_theme_ctrl:THEME_CONTROLLER; l_lib_ctrl:GAME_LIB_CONTROLLER)
+	make(l_init_ctrl:INIT_CONTROLLER; l_theme_ctrl:THEME_CONTROLLER; l_lib_ctrl:GAME_LIB_CONTROLLER;l_audio_ctrl:AUDIO_CONTROLLER)
 			-- Initialization for `Current'.
 		do
-			make_default (l_init_ctrl, l_theme_ctrl, l_lib_ctrl)
+			make_default (l_init_ctrl, l_theme_ctrl, l_lib_ctrl,l_audio_ctrl)
 			create tetris_ctrl.make(init_ctrl, theme_ctrl, lib_ctrl,theme_ctrl.menu_bg_alpha)
 			resume_enable:=false
 			create {GAME_SURFACE_IMG_FILE} fg_surface.make_with_alpha(theme_ctrl.menu_init_file_name)
@@ -25,9 +25,9 @@ feature {NONE} -- Initialization
 			is_animate:=true
 		end
 
-	make_with_resume(l_surface:GAME_SURFACE;l_init_ctrl:INIT_CONTROLLER; l_theme_ctrl:THEME_CONTROLLER; l_lib_ctrl:GAME_LIB_CONTROLLER)
+	make_with_resume(l_surface:GAME_SURFACE;l_init_ctrl:INIT_CONTROLLER; l_theme_ctrl:THEME_CONTROLLER; l_lib_ctrl:GAME_LIB_CONTROLLER;l_audio_ctrl:AUDIO_CONTROLLER)
 		do
-			make_default (l_init_ctrl, l_theme_ctrl, l_lib_ctrl)
+			make_default (l_init_ctrl, l_theme_ctrl, l_lib_ctrl,l_audio_ctrl)
 			create bk_surface.make (l_surface.width, l_surface.height, l_surface.bits_per_pixel, false)
 			l_surface.set_overall_alpha_value (theme_ctrl.menu_bg_alpha)
 			bk_surface.fill_rect (create {GAME_COLOR}.make_rgb(0,0,0), 0, 0, bk_surface.width, bk_surface.height)
@@ -40,13 +40,14 @@ feature {NONE} -- Initialization
 			update_screen
 		end
 
-	make_default(l_init_ctrl:INIT_CONTROLLER; l_theme_ctrl:THEME_CONTROLLER; l_lib_ctrl:GAME_LIB_CONTROLLER)
+	make_default(l_init_ctrl:INIT_CONTROLLER; l_theme_ctrl:THEME_CONTROLLER; l_lib_ctrl:GAME_LIB_CONTROLLER;l_audio_ctrl:AUDIO_CONTROLLER)
 		local
-			music:GAME_AUDIO_SOUND_FILE
+			music:AUDIO_SOUND_SND_FILE
 		do
 			init_ctrl:=l_init_ctrl
 			theme_ctrl:=l_theme_ctrl
 			lib_ctrl:=l_lib_ctrl
+			audio_ctrl:=l_audio_ctrl
 			create {GAME_SURFACE_IMG_FILE} arrow_surface.make_with_alpha(theme_ctrl.arrow_file_name)
 			arrow_mirror_surface:=arrow_surface.get_new_surface_mirror (true, false)
 			lib_ctrl.event_controller.on_quit_signal.extend (agent on_quit)
@@ -70,17 +71,17 @@ feature {NONE} -- Initialization
 				lib_ctrl.event_controller.on_key_down.extend (agent on_default_key_press)
 			end
 			if theme_ctrl.is_sound_enable then
-				lib_ctrl.source_add
-				sound_source:=lib_ctrl.source_get_last_add
+				audio_ctrl.source_add
+				sound_source:=audio_ctrl.source_get_last_add
 				if theme_ctrl.is_sound_menu_enter then
-					create {GAME_AUDIO_SOUND_FILE} sound_enter.make (theme_ctrl.sound_menu_enter_file)
+					create {AUDIO_SOUND_SND_FILE} sound_enter.make (theme_ctrl.sound_menu_enter_file)
 				end
 				if theme_ctrl.is_sound_menu_move then
-					create {GAME_AUDIO_SOUND_FILE} sound_move.make (theme_ctrl.sound_menu_move_file)
+					create {AUDIO_SOUND_SND_FILE} sound_move.make (theme_ctrl.sound_menu_move_file)
 				end
 				if theme_ctrl.is_music_menu then
-					lib_ctrl.source_add
-					music_source:=lib_ctrl.source_get_last_add
+					audio_ctrl.source_add
+					music_source:=audio_ctrl.source_get_last_add
 					if theme_ctrl.is_music_menu_intro then
 						create music.make (theme_ctrl.music_menu_intro_file)
 						music_source.queue_sound (music)
@@ -108,7 +109,7 @@ feature -- Access
 				from
 				until not sound_source.is_playing
 				loop
-					lib_ctrl.update_sound_playing
+					audio_ctrl.update
 					lib_ctrl.delay (100)
 				end
 			end
@@ -126,10 +127,10 @@ feature -- Access
 		do
 			if theme_ctrl.is_sound_enable then
 				sound_source.stop
-				lib_ctrl.sources_remove (sound_source)
+				audio_ctrl.sources_remove (sound_source)
 				if theme_ctrl.is_music_menu then
 					music_source.stop
-					lib_ctrl.sources_remove (music_source)
+					audio_ctrl.sources_remove (music_source)
 				end
 			end
 
@@ -431,6 +432,7 @@ feature {NONE} -- Implementation - Variables
 	init_ctrl:INIT_CONTROLLER
 	theme_ctrl:THEME_CONTROLLER
 	lib_ctrl:GAME_LIB_CONTROLLER
+	audio_ctrl:AUDIO_CONTROLLER
 	tetris_ctrl:TETRIS_AUTO_CONTROLLER
 	bk_surface:GAME_SURFACE
 	fg_surface:GAME_SURFACE
@@ -444,13 +446,13 @@ feature {NONE} -- Implementation - Variables
 
 	back_pressed, up_pressed, down_pressed, enter_pressed:BOOLEAN
 
-	sound_source:GAME_AUDIO_SOURCE
-	sound_move:GAME_AUDIO_SOUND
-	sound_enter:GAME_AUDIO_SOUND
+	sound_source:AUDIO_SOURCE
+	sound_move:AUDIO_SOUND
+	sound_enter:AUDIO_SOUND
 
 	stop_on_enter_sound_finish:BOOLEAN
 
-	music_source:GAME_AUDIO_SOURCE
+	music_source:AUDIO_SOURCE
 
 
 end
