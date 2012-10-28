@@ -17,7 +17,7 @@ feature {NONE} -- Initialization
 			audio_ctrl:AUDIO_CONTROLLER
 			text_ctrl:GAME_TEXT_CONTROLLER
 			img_ctrl:GAME_IMG_CONTROLLER
-		do
+		do 
 			create lib_ctrl.make
 			create audio_ctrl.make
 			create text_ctrl.make
