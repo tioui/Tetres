@@ -2,6 +2,6 @@ A simple Tetris clone developped with EiffelStudio and the Eiffel Game library E
 
 TODO:
     - Field Alignment
-
+    - XML and controller error management.
 
 
