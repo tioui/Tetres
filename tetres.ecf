@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <system xmlns="http://www.eiffel.com/developers/xml/configuration-1-10-0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.eiffel.com/developers/xml/configuration-1-10-0 http://www.eiffel.com/developers/xml/configuration-1-10-0.xsd" name="tetres" uuid="46FD29F2-0485-4A58-BDC7-E749CED4C3EE">
-	<target name="tetres-mac">
+	<target name="tetres-base" abstract="true">
 		<root class="APPLICATION" feature="make"/>
 		<option warning="true" is_attached_by_default="false" syntax="transitional">
 			<assertions precondition="true" postcondition="true" check="true" invariant="true" loop="true" supplier_precondition="true"/>
@@ -12,7 +12,7 @@
 		<library name="eiffel_game_lib" location="$EIF_GAME_LIB\game_core_lib\game_core_lib.ecf" readonly="true"/>
 		<library name="game_effects_lib" location="$EIF_GAME_LIB\game_effects_lib\game_effects_lib.ecf"/>
 		<library name="game_images_files_lib" location="$EIF_GAME_LIB\game_images_files_lib\game_images_files_lib.ecf"/>
-		<library name="game_text_lib" location="$EIF_GAME_LIB\game_text_lib\eiffel_text_lib.ecf" readonly="false"/>
+		<library name="game_text_lib" location="$EIF_GAME_LIB\game_text_lib\eiffel_text_lib.ecf"/>
 		<library name="xml_parser" location="$ISE_LIBRARY\library\text\parser\xml\parser\xml_parser.ecf"/>
 		<library name="xml_tree" location="$ISE_LIBRARY\library\text\parser\xml\tree\xml_tree.ecf"/>
 		<cluster name="project" location=".\" recursive="true">
@@ -24,16 +24,17 @@
 			</file_rule>
 		</cluster>
 	</target>
-	<target name="tetres" extends="tetres-mac">
+	<target name="tetres-mac" extends="tetres-base"/>
+	<target name="tetres" extends="tetres-base">
 		<precompile name="base_pre" location="$ISE_PRECOMP\base-mt.ecf"/>
 	</target>
-	<target name="tetres-caanoo" extends="tetres-mac">
+	<target name="tetres-caanoo" extends="tetres-base">
 		<option warning="true" is_attached_by_default="false" syntax="transitional">
 			<assertions/>
 		</option>
 		<variable name="toolchain" value="caanoo"/>
 	</target>
-	<target name="tetres-wiz" extends="tetres-mac">
+	<target name="tetres-wiz" extends="tetres-base">
 		<option warning="true" is_attached_by_default="false" syntax="transitional">
 			<assertions/>
 		</option>
