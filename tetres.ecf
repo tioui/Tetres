@@ -21,12 +21,17 @@
 				<exclude>/EIFGENs$</exclude>
 				<exclude>/CVS$</exclude>
 				<exclude>/theme$</exclude>
+				<exclude>/tests$</exclude>
 			</file_rule>
 		</cluster>
 	</target>
 	<target name="tetres-mac" extends="tetres-base"/>
 	<target name="tetres" extends="tetres-base">
 		<precompile name="base_pre" location="$ISE_PRECOMP\base-mt.ecf"/>
+	</target>
+	<target name="tetres-tests" extends="tetres">
+		<library name="testing" location="$ISE_LIBRARY\library\testing\testing.ecf"/>
+		<cluster name="tests" location=".\tests" recursive="true"/>
 	</target>
 	<target name="tetres-caanoo" extends="tetres-base">
 		<option warning="true" is_attached_by_default="false" syntax="transitional">
