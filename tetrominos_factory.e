@@ -76,6 +76,8 @@ feature -- Access
 		end
 
 	get_tetromino_by_index(index:INTEGER):TETROMINO
+		require
+			Tetromino_Index_Valid: index>=1 and index<=7
 		do
 			if index=tet_i.index then
 				Result:=get_tetromino_i

@@ -36,7 +36,7 @@ feature {NONE} -- Initialization
 			lib_ctrl:=l_lib_ctrl
 			event_controller:=l_lib_ctrl.event_controller
 			create blocks_surface.make (l_theme_ctrl.blocks_file_name)
-			create screen_surface.make (lib_ctrl.screen_surface.width, lib_ctrl.screen_surface.height, lib_ctrl.screen_surface.bits_per_pixel, false)
+			create screen_surface.make (lib_ctrl.screen_surface.width, lib_ctrl.screen_surface.height)
 			screen_surface.set_overall_alpha_value (255)
 			create bg_surface.make_with_alpha (theme_ctrl.bg_file_name)
 			create tetrominos_fact.make_with_alpha (blocks_surface, theme_ctrl.block_width, theme_ctrl.block_height,theme_ctrl.block_rotation,alpha)

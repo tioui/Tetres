@@ -328,12 +328,12 @@ feature -- Access
 			end
 		end
 
-		clear_anim
-			require
-				Clear_Anim_Enable: is_anim_enable
-			do
-				anim_List:=Void
-			end
+	clear_anim
+		require
+			Clear_Anim_Enable: is_anim_enable
+		do
+			anim_List:=Void
+		end
 
 	blocks_matrix:LIST[LIST[BLOCK]]
 
@@ -346,6 +346,7 @@ feature -- Access
 	anim_List:LIST[TUPLE[surface:GAME_SURFACE;line:INTEGER]]
 
 	max_anim_value:NATURAL
+	med_anim_value:NATURAL
 
 feature {NONE} -- Implementation - Routine
 
@@ -359,7 +360,7 @@ feature {NONE} -- Implementation - Variables
 	anim_surface:GAME_SURFACE
 
 
-	med_anim_value:NATURAL
+
 
 
 end

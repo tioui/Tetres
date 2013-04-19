@@ -28,7 +28,7 @@ feature {NONE} -- Initialization
 	make_with_resume(l_surface:GAME_SURFACE;l_init_ctrl:INIT_CONTROLLER; l_theme_ctrl:THEME_CONTROLLER; l_lib_ctrl:GAME_LIB_CONTROLLER;l_audio_ctrl:AUDIO_CONTROLLER)
 		do
 			make_default (l_init_ctrl, l_theme_ctrl, l_lib_ctrl,l_audio_ctrl)
-			create bk_surface.make (l_surface.width, l_surface.height, l_surface.bits_per_pixel, false)
+			create bk_surface.make_with_bit_per_pixel (l_surface.width, l_surface.height, l_surface.bits_per_pixel, false)
 			l_surface.set_overall_alpha_value (theme_ctrl.menu_bg_alpha)
 			bk_surface.fill_rect (create {GAME_COLOR}.make_rgb(0,0,0), 0, 0, bk_surface.width, bk_surface.height)
 			bk_surface.set_overall_alpha_value (255)

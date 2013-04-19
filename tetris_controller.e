@@ -194,7 +194,7 @@ feature {NONE} -- Implementation - Routines
 			end
 
 			lib_ctrl.stop
-			create last_image_surface.make (screen_surface.width, screen_surface.height, screen_surface.bits_per_pixel, false)
+			create last_image_surface.make (screen_surface.width, screen_surface.height)
 			last_image_surface.print_surface_on_surface (bg_surface, 0, 0)
 			if theme_ctrl.score_show then
 				print_score(last_image_surface)
@@ -480,15 +480,17 @@ feature {NONE} -- Implementation - Routines
 
 	drop
 		local
-			old_tetromino:TETROMINO
+			old_y:INTEGER
 		do
 			if not anim_in_progress then
 				from
-					old_tetromino:=currents_tetrominos.first
+					old_y:=currents_tetrominos.first.y+1
 				until
-					old_tetromino/=currents_tetrominos.first
+					not (old_y>currents_tetrominos.first.y)
 				loop
+					old_y:=currents_tetrominos.first.y
 					go_down(false)
+
 				end
 			end
 		end
@@ -561,8 +563,10 @@ feature {NONE} -- Implementation - Routines
 					currents_tetrominos.first.cancel_last_move
 					pfield.freeze_tetromino (currents_tetrominos.first)
 					valid_lines
-					change_current_tetromino
-					down_tick_number:=lib_ctrl.get_ticks
+					if not anim_in_progress then
+						change_current_tetromino
+						down_tick_number:=lib_ctrl.get_ticks
+					end
 				else
 					if play_sound and then down_sound and theme_ctrl.is_sound_game_down then
 						sound_source.stop
@@ -643,6 +647,7 @@ feature {NONE} -- Implementation - Routines
 
 	cont_anim
 		local
+			old_value:NATURAL
 			l_ticks:NATURAL
 		do
 			l_ticks:=lib_ctrl.get_ticks
@@ -658,11 +663,13 @@ feature {NONE} -- Implementation - Routines
 					sound_source.queue_sound (sound_collapse)
 					sound_source.play
 				end
+				change_current_tetromino
 				update_screen
 				down_tick_number:=lib_ctrl.get_ticks
 			else
+				old_value:=anim_current_value
 				anim_current_value:=(l_ticks-anim_start)//theme_ctrl.lines_anim_step
-				if anim_current_value=theme_ctrl.lines_anim_delay//2 then
+				if old_value<=pfield.med_anim_value and anim_current_value>pfield.med_anim_value then
 					pfield.remove_full_lines_block
 				end
 				update_screen
@@ -834,7 +841,7 @@ feature {NONE} -- Implementation - Routines
 			update_screen
 			lib_ctrl.stop
 			is_game_over:=true
-			create last_image_surface.make (screen_surface.width, screen_surface.height, lib_ctrl.screen_surface.bits_per_pixel, false)
+			create last_image_surface.make (screen_surface.width, screen_surface.height)
 			last_image_surface.print_surface_on_surface (screen_surface, 0, 0)
 		end
 
