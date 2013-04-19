@@ -1,2 +1,6 @@
+A simple Tetris clone called Tetres developped with EiffelStudio and the Eiffel Game library Eiffel_Game_Lib.
+
 TODO:
-    - Field Alignment 
+    - Field Alignment
+    - XML and controller error management.
+
