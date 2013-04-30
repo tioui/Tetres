@@ -32,7 +32,7 @@ feature {NONE} -- Initialization
 			l_surface.set_overall_alpha_value (theme_ctrl.menu_bg_alpha)
 			bk_surface.fill_rect (create {GAME_COLOR}.make_rgb(0,0,0), 0, 0, bk_surface.width, bk_surface.height)
 			bk_surface.set_overall_alpha_value (255)
-			bk_surface.print_surface_on_surface (l_surface, 0, 0)
+			bk_surface.draw_surface (l_surface, 0, 0)
 			resume_enable:=true
 			create {GAME_SURFACE_IMG_FILE} fg_surface.make_with_alpha(theme_ctrl.menu_resume_file_name)
 			is_resuming:=true
@@ -49,7 +49,7 @@ feature {NONE} -- Initialization
 			lib_ctrl:=l_lib_ctrl
 			audio_ctrl:=l_audio_ctrl
 			create {GAME_SURFACE_IMG_FILE} arrow_surface.make_with_alpha(theme_ctrl.arrow_file_name)
-			arrow_mirror_surface:=arrow_surface.get_new_surface_mirror (true, false)
+			arrow_mirror_surface:=arrow_surface.surface_mirrored (true, false)
 			lib_ctrl.event_controller.on_quit_signal.extend (agent on_quit)
 			if init_ctrl.custom_control_enable then
 				if init_ctrl.custom_control_ctrl.keyboard_enable then
@@ -392,35 +392,35 @@ feature {NONE} -- Implementation - Routines
 		do
 			lib_ctrl.screen_surface.fill_rect (create {GAME_COLOR}.make_rgb(0,0,0), 0, 0, lib_ctrl.screen_surface.width, lib_ctrl.screen_surface.height)
 			if resume_enable then
-				lib_ctrl.screen_surface.print_surface_on_surface (bk_surface, 0, 0)
+				lib_ctrl.screen_surface.draw_surface (bk_surface, 0, 0)
 			else
 				tetris_ctrl.print_screen
-				lib_ctrl.screen_surface.print_surface_on_surface (tetris_ctrl.screen_surface, 0, 0)
+				lib_ctrl.screen_surface.draw_surface (tetris_ctrl.screen_surface, 0, 0)
 			end
-			lib_ctrl.screen_surface.print_surface_on_surface (fg_surface, 0, 0)
+			lib_ctrl.screen_surface.draw_surface (fg_surface, 0, 0)
 			if start_game then
 				if theme_ctrl.menu_new_game_mirror then
-					lib_ctrl.screen_surface.print_surface_on_surface (arrow_mirror_surface,theme_ctrl.menu_new_game_x,theme_ctrl.menu_new_game_y)
+					lib_ctrl.screen_surface.draw_surface (arrow_mirror_surface,theme_ctrl.menu_new_game_x,theme_ctrl.menu_new_game_y)
 				else
-					lib_ctrl.screen_surface.print_surface_on_surface (arrow_surface,theme_ctrl.menu_new_game_x,theme_ctrl.menu_new_game_y)
+					lib_ctrl.screen_surface.draw_surface (arrow_surface,theme_ctrl.menu_new_game_x,theme_ctrl.menu_new_game_y)
 				end
 			elseif is_resuming then
 				if theme_ctrl.menu_resume_mirror then
-					lib_ctrl.screen_surface.print_surface_on_surface (arrow_mirror_surface,theme_ctrl.menu_resume_x,theme_ctrl.menu_resume_y)
+					lib_ctrl.screen_surface.draw_surface (arrow_mirror_surface,theme_ctrl.menu_resume_x,theme_ctrl.menu_resume_y)
 				else
-					lib_ctrl.screen_surface.print_surface_on_surface (arrow_surface,theme_ctrl.menu_resume_x,theme_ctrl.menu_resume_y)
+					lib_ctrl.screen_surface.draw_surface (arrow_surface,theme_ctrl.menu_resume_x,theme_ctrl.menu_resume_y)
 				end
 --			elseif is_settings then
 --				if theme_ctrl.menu_settings_mirror then
---					lib_ctrl.screen_surface.print_surface_on_surface (arrow_mirror_surface,theme_ctrl.menu_settings_x,theme_ctrl.menu_settings_y)
+--					lib_ctrl.screen_surface.draw_surface (arrow_mirror_surface,theme_ctrl.menu_settings_x,theme_ctrl.menu_settings_y)
 --				else
---					lib_ctrl.screen_surface.print_surface_on_surface (arrow_surface,theme_ctrl.menu_settings_x,theme_ctrl.menu_settings_y)
+--					lib_ctrl.screen_surface.draw_surface (arrow_surface,theme_ctrl.menu_settings_x,theme_ctrl.menu_settings_y)
 --				end
 			elseif is_quitting then
 				if theme_ctrl.menu_quit_mirror then
-					lib_ctrl.screen_surface.print_surface_on_surface (arrow_mirror_surface,theme_ctrl.menu_quit_x,theme_ctrl.menu_quit_y)
+					lib_ctrl.screen_surface.draw_surface (arrow_mirror_surface,theme_ctrl.menu_quit_x,theme_ctrl.menu_quit_y)
 				else
-					lib_ctrl.screen_surface.print_surface_on_surface (arrow_surface,theme_ctrl.menu_quit_x,theme_ctrl.menu_quit_y)
+					lib_ctrl.screen_surface.draw_surface (arrow_surface,theme_ctrl.menu_quit_x,theme_ctrl.menu_quit_y)
 				end
 			end
 			lib_ctrl.flip_screen

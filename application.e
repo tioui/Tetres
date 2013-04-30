@@ -17,7 +17,7 @@ feature {NONE} -- Initialization
 			audio_ctrl:AUDIO_CONTROLLER
 			text_ctrl:GAME_TEXT_CONTROLLER
 			img_ctrl:GAME_IMG_CONTROLLER
-		do 
+		do
 			create lib_ctrl.make
 			create audio_ctrl.make
 			create text_ctrl.make
@@ -136,7 +136,7 @@ feature {NONE} -- Initialization
 			title_surface:GAME_SURFACE_IMG_FILE
 		do
 			create title_surface.make (l_theme_ctrl.title_file_name)
-			l_lib_ctrl.screen_surface.print_surface_on_surface (title_surface, 0, 0)
+			l_lib_ctrl.screen_surface.draw_surface (title_surface, 0, 0)
 			l_lib_ctrl.flip_screen
 		end
 
@@ -164,9 +164,9 @@ feature {NONE} -- Initialization
 		do
 			l_surface.set_overall_alpha_value (theme_ctrl.menu_bg_alpha)
 			lib_ctrl.screen_surface.fill_rect (create {GAME_COLOR}.make_rgb(0,0,0), 0, 0, lib_ctrl.screen_surface.width, lib_ctrl.screen_surface.height)
-			lib_ctrl.screen_surface.print_surface_on_surface (l_surface, 0, 0)
+			lib_ctrl.screen_surface.draw_surface (l_surface, 0, 0)
 			create game_over_surface.make_with_alpha (theme_ctrl.game_over_file_name)
-			lib_ctrl.screen_surface.print_surface_on_surface (game_over_surface, 0, 0)
+			lib_ctrl.screen_surface.draw_surface (game_over_surface, 0, 0)
 			lib_ctrl.flip_screen
 			lib_ctrl.delay (theme_ctrl.game_over_time)
 		end

@@ -158,7 +158,7 @@ feature -- Access
 					j>4
 				loop
 					if blocks_matrix.at (i).at (j)/=Void then
-						l_surface.print_surface_on_surface (blocks_matrix.at (i).at (j).surface,(j-1)*blocks_matrix.at (i).at (j).surface.width+l_x,(i-1)*blocks_matrix.at (i).at (j).surface.height+l_y)
+						l_surface.draw_surface (blocks_matrix.at (i).at (j).surface,(j-1)*blocks_matrix.at (i).at (j).surface.width+l_x,(i-1)*blocks_matrix.at (i).at (j).surface.height+l_y)
 					end
 					j:=j+1
 				end
@@ -242,8 +242,8 @@ feature {NONE} -- Implementation - Routines
 					nb_rotation:=0
 				end
 				list_blocks_matrix.at ((i-1)//4+1).at (blocks_positions_init.at (i).row).at (blocks_positions_init.at (i).column) :=
-						create {BLOCK}.make(l_surface.get_sub_surface (((i-1)\\4)*block_width.to_integer_32, (index-1)*block_height.to_integer_32,
-												block_width.to_integer_32, block_height.to_integer_32).get_new_surface_rotate_90_degree (nb_rotation))
+						create {BLOCK}.make(l_surface.sub_surface (((i-1)\\4)*block_width.to_integer_32, (index-1)*block_height.to_integer_32,
+												block_width.to_integer_32, block_height.to_integer_32).surface_rotated_90_degree (nb_rotation))
 				i:=i+1
 			end
 		end

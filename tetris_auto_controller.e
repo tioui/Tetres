@@ -68,7 +68,7 @@ feature -- Access
 	print_screen
 		do
 			screen_surface.fill_rect (create {GAME_COLOR}.make_rgb(0,0,0), 0, 0, lib_ctrl.screen_surface.width, lib_ctrl.screen_surface.height)
-			screen_surface.print_surface_on_surface (bg_surface, 0, 0)
+			screen_surface.draw_surface (bg_surface, 0, 0)
 			if init_ctrl.is_ghost_show then
 				update_ghost
 				pfield.print_playfield_with_tetromino_and_ghost (currents_tetrominos.first,current_tetromino_ghost, screen_surface)

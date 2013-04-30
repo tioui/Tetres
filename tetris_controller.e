@@ -195,7 +195,7 @@ feature {NONE} -- Implementation - Routines
 
 			lib_ctrl.stop
 			create last_image_surface.make (screen_surface.width, screen_surface.height)
-			last_image_surface.print_surface_on_surface (bg_surface, 0, 0)
+			last_image_surface.draw_surface (bg_surface, 0, 0)
 			if theme_ctrl.score_show then
 				print_score(last_image_surface)
 			end
@@ -761,7 +761,7 @@ feature {NONE} -- Implementation - Routines
 
 	update_screen
 		do
-			screen_surface.print_surface_on_surface (bg_surface, 0, 0)
+			screen_surface.draw_surface (bg_surface, 0, 0)
 			if not anim_in_progress then
 				if init_ctrl.is_ghost_show then
 					update_ghost
@@ -795,17 +795,17 @@ feature {NONE} -- Implementation - Routines
 
 	print_level(target_surface:GAME_SURFACE)
 		do
-			target_surface.print_surface_on_surface (level_surface, theme_ctrl.level_x, theme_ctrl.level_y)
+			target_surface.draw_surface (level_surface, theme_ctrl.level_x, theme_ctrl.level_y)
 		end
 
 	print_lines(target_surface:GAME_SURFACE)
 		do
-			target_surface.print_surface_on_surface (lines_surface, theme_ctrl.lines_x+(theme_ctrl.lines_w - lines_surface.width)//2, theme_ctrl.lines_y)
+			target_surface.draw_surface (lines_surface, theme_ctrl.lines_x+(theme_ctrl.lines_w - lines_surface.width)//2, theme_ctrl.lines_y)
 		end
 
 	print_score(target_surface:GAME_SURFACE)
 		do
-			target_surface.print_surface_on_surface (score_surface, theme_ctrl.score_x+(theme_ctrl.score_w - score_surface.width)//2, theme_ctrl.score_y)
+			target_surface.draw_surface (score_surface, theme_ctrl.score_x+(theme_ctrl.score_w - score_surface.width)//2, theme_ctrl.score_y)
 		end
 
 	print_next_field
@@ -842,7 +842,7 @@ feature {NONE} -- Implementation - Routines
 			lib_ctrl.stop
 			is_game_over:=true
 			create last_image_surface.make (screen_surface.width, screen_surface.height)
-			last_image_surface.print_surface_on_surface (screen_surface, 0, 0)
+			last_image_surface.draw_surface (screen_surface, 0, 0)
 		end
 
 

@@ -128,10 +128,10 @@ feature -- Access
 					anim_list.exhausted
 				loop
 					if value<med_anim_value then
-						l_surface.print_surface_part_on_surface (anim_list.item.surface, 0, 0, x, (height.to_integer_32-anim_list.item.line)*block_height+y, ((anim_list.item.surface.width.to_natural_32//med_anim_value)*value).to_integer_32, anim_list.item.surface.height)
+						l_surface.draw_sub_surface (anim_list.item.surface, 0, 0, x, (height.to_integer_32-anim_list.item.line)*block_height+y, ((anim_list.item.surface.width.to_natural_32//med_anim_value)*value).to_integer_32, anim_list.item.surface.height)
 					else
 						temp_x:=((anim_list.item.surface.width.to_natural_32//med_anim_value)*(value-med_anim_value)).to_integer_32
-						l_surface.print_surface_part_on_surface (anim_list.item.surface, temp_x, 0, x+temp_x, (height.to_integer_32-anim_list.item.line)*block_height+y, anim_list.item.surface.width-temp_x, anim_list.item.surface.height)
+						l_surface.draw_sub_surface (anim_list.item.surface, temp_x, 0, x+temp_x, (height.to_integer_32-anim_list.item.line)*block_height+y, anim_list.item.surface.width-temp_x, anim_list.item.surface.height)
 					end
 
 					anim_list.forth
@@ -155,7 +155,7 @@ feature -- Access
 					j>width.to_integer_32
 				loop
 					if blocks_matrix.at (i).at (j)/=Void then
-						l_surface.print_surface_on_surface (blocks_matrix.at (i).at (j).surface, (j-1)*block_width+x, (height.to_integer_32-i)*block_height+y)
+						l_surface.draw_surface (blocks_matrix.at (i).at (j).surface, (j-1)*block_width+x, (height.to_integer_32-i)*block_height+y)
 					end
 					j:=j+1
 				end
@@ -180,7 +180,7 @@ feature -- Access
 					pos_y:=l_tetromino.y-(i-1)
 					pos_x:=j+l_tetromino.x-1
 					if l_tetromino.blocks_matrix.at (i).at (j)/=Void and then pos_x>0 and then pos_x<=width.to_integer_32 and then pos_y>0 and then pos_y<=height.to_integer_32 then
-						l_surface.print_surface_on_surface (l_tetromino.blocks_matrix.at (i).at (j).surface,(pos_x-1)*block_width+x,(height.to_integer_32-pos_y)*block_height+y)
+						l_surface.draw_surface (l_tetromino.blocks_matrix.at (i).at (j).surface,(pos_x-1)*block_width+x,(height.to_integer_32-pos_y)*block_height+y)
 					end
 					j:=j+1
 				end
@@ -305,26 +305,26 @@ feature -- Access
 		do
 			create {LINKED_LIST[TUPLE[surface:GAME_SURFACE;line:INTEGER]]} anim_List.make
 			if nb_full_lines=1 then
-				anim_list.extend ([anim_surface.get_sub_surface (0, 0, block_width*width.to_integer_32, block_height),full_lines_index.first])
+				anim_list.extend ([anim_surface.sub_surface (0, 0, block_width*width.to_integer_32, block_height),full_lines_index.first])
 			elseif nb_full_lines=2 then
 				if full_lines_index.at (1)+1=full_lines_index.at (2) then
-					anim_list.extend ([anim_surface.get_sub_surface (0, block_height, block_width*width.to_integer_32, block_height*2),full_lines_index.at(2)])
+					anim_list.extend ([anim_surface.sub_surface (0, block_height, block_width*width.to_integer_32, block_height*2),full_lines_index.at(2)])
 				else
-					anim_list.extend ([anim_surface.get_sub_surface (0, block_height*3, block_width*width.to_integer_32, block_height),full_lines_index.at(2)])
-					anim_list.extend ([anim_surface.get_sub_surface (0, block_height*4, block_width*width.to_integer_32, block_height),full_lines_index.at(1)])
+					anim_list.extend ([anim_surface.sub_surface (0, block_height*3, block_width*width.to_integer_32, block_height),full_lines_index.at(2)])
+					anim_list.extend ([anim_surface.sub_surface (0, block_height*4, block_width*width.to_integer_32, block_height),full_lines_index.at(1)])
 				end
 			elseif nb_full_lines=3 then
 				if full_lines_index.at (1)+2=full_lines_index.at (3) then
-					anim_list.extend ([anim_surface.get_sub_surface (0, block_height*5, block_width*width.to_integer_32, block_height*3),full_lines_index.at(3)])
+					anim_list.extend ([anim_surface.sub_surface (0, block_height*5, block_width*width.to_integer_32, block_height*3),full_lines_index.at(3)])
 				elseif full_lines_index.at (1)+1=full_lines_index.at (2) then
-					anim_list.extend ([anim_surface.get_sub_surface (0, block_height*8, block_width*width.to_integer_32, block_height),full_lines_index.at(3)])
-					anim_list.extend ([anim_surface.get_sub_surface (0, block_height*9, block_width*width.to_integer_32, block_height*2),full_lines_index.at(2)])
+					anim_list.extend ([anim_surface.sub_surface (0, block_height*8, block_width*width.to_integer_32, block_height),full_lines_index.at(3)])
+					anim_list.extend ([anim_surface.sub_surface (0, block_height*9, block_width*width.to_integer_32, block_height*2),full_lines_index.at(2)])
 				else
-					anim_list.extend ([anim_surface.get_sub_surface (0, block_height*11, block_width*width.to_integer_32, block_height*2),full_lines_index.at(3)])
-					anim_list.extend ([anim_surface.get_sub_surface (0, block_height*13, block_width*width.to_integer_32, block_height),full_lines_index.at(1)])
+					anim_list.extend ([anim_surface.sub_surface (0, block_height*11, block_width*width.to_integer_32, block_height*2),full_lines_index.at(3)])
+					anim_list.extend ([anim_surface.sub_surface (0, block_height*13, block_width*width.to_integer_32, block_height),full_lines_index.at(1)])
 				end
 			elseif nb_full_lines=4 then
-				anim_list.extend ([anim_surface.get_sub_surface (0, block_height*14, block_width*width.to_integer_32, block_height*4),full_lines_index.last])
+				anim_list.extend ([anim_surface.sub_surface (0, block_height*14, block_width*width.to_integer_32, block_height*4),full_lines_index.last])
 			end
 		end
 
