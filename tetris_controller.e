@@ -68,8 +68,8 @@ feature {NONE} -- Initialization
 			event_controller.on_quit_signal.extend(agent on_quit)
 			play_sound:=theme_ctrl.is_sound_enable
 			if play_sound then
-				audio_ctrl.source_add
-				sound_source:=audio_ctrl.source_get_last_add
+				audio_ctrl.add_source
+				sound_source:=audio_ctrl.last_source
 				if theme_ctrl.is_sound_game_drop then
 					create {AUDIO_SOUND_SND_FILE} sound_drop.make(theme_ctrl.sound_game_drop_file)
 				end
@@ -89,8 +89,8 @@ feature {NONE} -- Initialization
 					create {AUDIO_SOUND_SND_FILE} sound_collapse.make(theme_ctrl.sound_game_collapse_file)
 				end
 				if theme_ctrl.is_music_game then
-					audio_ctrl.source_add
-					music_source:=audio_ctrl.source_get_last_add
+					audio_ctrl.add_source
+					music_source:=audio_ctrl.last_source
 					if theme_ctrl.is_music_game_intro then
 						create music.make (theme_ctrl.music_game_intro_file)
 						music_source.queue_sound (music)

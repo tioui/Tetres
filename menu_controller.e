@@ -71,8 +71,8 @@ feature {NONE} -- Initialization
 				lib_ctrl.event_controller.on_key_down.extend (agent on_default_key_press)
 			end
 			if theme_ctrl.is_sound_enable then
-				audio_ctrl.source_add
-				sound_source:=audio_ctrl.source_get_last_add
+				audio_ctrl.add_source
+				sound_source:=audio_ctrl.last_source
 				if theme_ctrl.is_sound_menu_enter then
 					create {AUDIO_SOUND_SND_FILE} sound_enter.make (theme_ctrl.sound_menu_enter_file)
 				end
@@ -80,8 +80,8 @@ feature {NONE} -- Initialization
 					create {AUDIO_SOUND_SND_FILE} sound_move.make (theme_ctrl.sound_menu_move_file)
 				end
 				if theme_ctrl.is_music_menu then
-					audio_ctrl.source_add
-					music_source:=audio_ctrl.source_get_last_add
+					audio_ctrl.add_source
+					music_source:=audio_ctrl.last_source
 					if theme_ctrl.is_music_menu_intro then
 						create music.make (theme_ctrl.music_menu_intro_file)
 						music_source.queue_sound (music)
@@ -127,10 +127,10 @@ feature -- Access
 		do
 			if theme_ctrl.is_sound_enable then
 				sound_source.stop
-				audio_ctrl.sources_remove (sound_source)
+				audio_ctrl.prune_source (sound_source)
 				if theme_ctrl.is_music_menu then
 					music_source.stop
-					audio_ctrl.sources_remove (music_source)
+					audio_ctrl.prune_source (music_source)
 				end
 			end
 
