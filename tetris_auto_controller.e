@@ -16,7 +16,7 @@ inherit
 	undefine
 		update_screen
 	redefine
-		on_tick,
+		on_iteration,
 		change_current_tetromino,
 		game_over
 	end
@@ -51,7 +51,7 @@ feature {NONE} -- Initialization
 			is_game_over:=false
 			create mem
 			bg_surface.set_overall_alpha_value (alpha)
-			event_controller.on_tick.extend(agent on_tick)
+			event_controller.on_iteration.extend(agent on_iteration)
 			down_delay:=200
 			auto_move_delay:=100
 			auto_move_tick:=lib_ctrl.get_ticks
@@ -85,7 +85,7 @@ feature -- Access
 
 feature {NONE} -- Implementation - Routines
 
-	on_tick(nb_tick:NATURAL_32)
+	on_iteration
 		do
 			if lib_ctrl.get_ticks>auto_move_tick+auto_move_delay then
 				if auto_left_tetromino_rotation>0 then
@@ -107,7 +107,7 @@ feature {NONE} -- Implementation - Routines
 				end
 				auto_move_tick:=lib_ctrl.get_ticks
 			end
-			precursor(nb_tick)
+			precursor
 		end
 
 	change_current_tetromino

@@ -92,7 +92,7 @@ feature {NONE} -- Initialization
 				end
 			end
 
-			lib_ctrl.event_controller.on_tick.extend (agent on_tick)
+			lib_ctrl.event_controller.on_iteration.extend (agent on_tick)
 			is_quitting:=false
 			start_game:=false
 			is_resuming:=false
@@ -138,7 +138,7 @@ feature -- Access
 
 feature {NONE} -- Implementation - Routines
 
-	on_tick(nb_tick:NATURAL_32)
+	on_tick
 		do
 			if last_tick+100<lib_ctrl.get_ticks then
 				update_screen

@@ -16,7 +16,7 @@ feature {NONE} -- Initialization
 			-- Initialization for `Current'.
 		local
 			init_file_name:STRING
-			pars:XML_LITE_PARSER
+			pars:XML_STANDARD_PARSER
 			tree_pipe: XML_CALLBACKS_DOCUMENT
 		do
 			has_error:=false
@@ -25,7 +25,7 @@ feature {NONE} -- Initialization
 			create pars.make
 			create tree_pipe.make_null
 			pars.set_callbacks (tree_pipe)
-			pars.parse_from_filename (init_file_name)
+			pars.parse_from_path (create {PATH}.make_from_string(init_file_name))
 			if pars.error_occurred then
 				has_error:=true
 				io.error.put_string (pars.error_message)

@@ -96,7 +96,7 @@ feature {NONE} -- Initialization
 						show_menu(is_resume,temp_surface,init_ctrl, theme_ctrl, lib_ctrl,audio_ctrl)
 						lib_ctrl.clear_event_controller
 						if theme_ctrl.is_sound_enable and then not init_ctrl.is_sound_thread then
-							lib_ctrl.event_controller.on_tick.extend (agent audio_ctrl.update)
+							lib_ctrl.event_controller.on_iteration.extend (agent audio_ctrl.update)
 						end
 						mem.full_collect
 						mem.full_coalesce
@@ -113,7 +113,7 @@ feature {NONE} -- Initialization
 							tetris_ctrl.launch
 							lib_ctrl.clear_event_controller
 							if theme_ctrl.is_sound_enable and then not init_ctrl.is_sound_thread then
-								lib_ctrl.event_controller.on_tick.extend (agent audio_ctrl.update)
+								lib_ctrl.event_controller.on_iteration.extend (agent audio_ctrl.update)
 							end
 							mem.full_collect
 							mem.full_coalesce

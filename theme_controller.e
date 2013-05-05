@@ -17,7 +17,7 @@ feature {NONE} -- Initialization
 	make(theme_name:STRING)
 			-- Initialization for `Current'.
 		local
-			pars:XML_LITE_PARSER
+			pars:XML_STANDARD_PARSER
 			tree_pipe: XML_CALLBACKS_DOCUMENT
 		do
 			has_error:=false
@@ -29,7 +29,7 @@ feature {NONE} -- Initialization
 			create pars.make
 			create tree_pipe.make_null
 			pars.set_callbacks (tree_pipe)
-			pars.parse_from_filename (config_file_name)
+			pars.parse_from_path (create {PATH}.make_from_string(config_file_name))
 			if pars.error_occurred then
 				has_error:=true
 				io.error.put_string (pars.error_message)

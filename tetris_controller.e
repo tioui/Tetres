@@ -64,7 +64,7 @@ feature {NONE} -- Initialization
 				event_controller.on_key_down.extend (agent default_key_press)
 				event_controller.on_key_up.extend (agent on_key_up)
 			end
-			event_controller.on_tick.extend(agent on_tick)
+			event_controller.on_iteration.extend(agent on_iteration)
 			event_controller.on_quit_signal.extend(agent on_quit)
 			play_sound:=theme_ctrl.is_sound_enable
 			if play_sound then
@@ -151,7 +151,7 @@ feature -- Access
 
 feature {NONE} -- Implementation - Routines
 
-	on_tick(nb_tick:NATURAL_32)
+	on_iteration
 		do
 			if anim_in_progress then
 				cont_anim
