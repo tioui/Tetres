@@ -11,26 +11,27 @@
 		<library name="eiffel_game_lib" location="$EIF_GAME_LIB\game_core_lib\game_core_lib.ecf" readonly="true"/>
 		<library name="game_effects_lib" location="$EIF_GAME_LIB\game_effects_lib\game_effects_lib.ecf"/>
 		<library name="game_images_files_lib" location="$EIF_GAME_LIB\game_images_files_lib\game_images_files_lib.ecf"/>
-		<library name="game_text_lib" location="$EIF_GAME_LIB\game_text_lib\eiffel_text_lib.ecf"/>
+		<library name="game_text_lib" location="$EIF_GAME_LIB\game_text_lib\game_text_lib.ecf"/>
 		<library name="xml_parser" location="$ISE_LIBRARY\library\text\parser\xml\parser\xml_parser.ecf"/>
 		<library name="xml_tree" location="$ISE_LIBRARY\library\text\parser\xml\tree\xml_tree.ecf"/>
 		<cluster name="tetres" location=".\" recursive="true">
 			<file_rule>
-				<exclude>/.git$</exclude>
+				<exclude>/theme$</exclude>
 				<exclude>/EIFGENs$</exclude>
 				<exclude>/CVS$</exclude>
-				<exclude>/theme$</exclude>
+				<exclude>/.git$</exclude>
 				<exclude>/tests$</exclude>
 			</file_rule>
 		</cluster>
 	</target>
-	<target name="tetres-mac" extends="tetres-base"/>
+	<target name="tetres-mac" extends="tetres-base">
+	</target>
 	<target name="tetres" extends="tetres-base">
 		<precompile name="base_pre" location="$ISE_PRECOMP\base-mt.ecf"/>
 	</target>
 	<target name="tetres-tests" extends="tetres">
 		<library name="testing" location="$ISE_LIBRARY\library\testing\testing.ecf"/>
-		<cluster name="tests" location=".\tests" recursive="true"/>
+		<cluster name="tests" location=".\tests\" recursive="true"/>
 	</target>
 	<target name="tetres-caanoo" extends="tetres-base">
 		<option warning="true" is_attached_by_default="false" syntax="transitional">
@@ -45,7 +46,7 @@
 		<variable name="toolchain" value="wiz"/>
 	</target>
 	<target name="tetres-so" extends="tetres-mac">
-		<setting name="concurrency" value="none"/>
 		<setting name="shared_library_definition" value="test.def"/>
+		<setting name="concurrency" value="none"/>
 	</target>
 </system>
