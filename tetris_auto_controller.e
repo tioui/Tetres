@@ -1,5 +1,5 @@
 note
-	description: "Summary description for {TETRIS_AUTO_CONTROLLER}."
+	description : "Automatic playing."
 	author      : "Louis Marchand"
 	date        : "July 19 2012"
 	revision    : "1.0"
@@ -27,7 +27,9 @@ create
 feature {NONE} -- Initialization
 
 	make(l_init_ctrl:INIT_CONTROLLER; l_theme_ctrl:THEME_CONTROLLER; l_lib_ctrl:GAME_LIB_CONTROLLER;alpha:NATURAL_8)
-			-- Initialization for `Current'.
+			-- Initialization for `Current' loading configuration from `l_init_ctrl',
+			-- theme from `l_heme_ctrl', using `l_lib_ctrl' as game library and
+			-- `alpha' as global transparency value.
 		local
 			ghost_alpha:INTEGER
 		do
@@ -66,6 +68,7 @@ feature {NONE} -- Initialization
 feature -- Access
 
 	print_screen
+			-- Show `Current'
 		do
 			screen_surface.fill_rect (create {GAME_COLOR}.make_rgb(0,0,0), 0, 0, lib_ctrl.screen_surface.width, lib_ctrl.screen_surface.height)
 			screen_surface.draw_surface (bg_surface, 0, 0)
@@ -86,6 +89,7 @@ feature -- Access
 feature {NONE} -- Implementation - Routines
 
 	on_iteration
+			-- <Precursor>
 		do
 			if lib_ctrl.get_ticks>auto_move_tick+auto_move_delay then
 				if auto_left_tetromino_rotation>0 then
@@ -111,6 +115,7 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	change_current_tetromino
+			-- <Precursor>
 		do
 			precursor
 			lib_ctrl.generate_new_random
@@ -122,11 +127,13 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	update_screen
+			-- Do nothing
 		do
 
 		end
 
 	game_over
+			-- <Precursor>
 		do
 			create pfield.make (theme_ctrl.playfield_x.to_integer_32, theme_ctrl.playfield_y.to_integer_32, theme_ctrl.block_width, theme_ctrl.block_height)
 			mem.full_collect
@@ -135,10 +142,16 @@ feature {NONE} -- Implementation - Routines
 feature {NONE} -- Implementation - Variables
 
 	auto_next_tetromino_position:INTEGER
+			-- Next position to place the {TETROMINO}
 	auto_left_tetromino_rotation:INTEGER
+			-- Left position to place the {TETROMINO}
 	auto_right_tetromino_rotation:INTEGER
+			-- Right position to place the {TETROMINO}
 	auto_down_delay:NATURAL
+			-- Delay of the falling {TETROMINO}
 	auto_move_delay:NATURAL
+			-- Delay of the automatic user movement
 	auto_move_tick:NATURAL
+			-- FPS of the automatic user movement
 
 end

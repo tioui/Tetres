@@ -1,5 +1,5 @@
 note
-	description: "Summary description for {PLAYFIELD}."
+	description : "Manage the playing area of the game."
 	author      : "Louis Marchand"
 	date        : "July 19 2012"
 	revision    : "1.0"
@@ -14,7 +14,8 @@ create
 feature {NONE} -- Initialization
 
 	make(l_x,l_y:INTEGER;l_block_width,l_block_height:NATURAL)
-			-- Initialization for `Current'.
+			-- Initialization for `Current' starting at (`l_x',`l_y') and
+			-- of dimension `l_block_width' by `l_block_height' blocks.
 		local
 			i,j:INTEGER
 			line:ARRAYED_LIST[BLOCK]
@@ -47,6 +48,10 @@ feature {NONE} -- Initialization
 		end
 
 	make_with_anim(l_x,l_y:INTEGER;l_block_width,l_block_height:NATURAL;l_anim_surface:GAME_SURFACE;l_max_anim_value:NATURAL)
+			-- Initialization for `Current' starting at (`l_x',`l_y') and
+			-- of dimension `l_block_width' by `l_block_height' blocks,
+			-- used for automatic animation on `l_anim_surface' with
+			-- `l_max_anim_value' maximum update of the `Current'.
 		do
 			make(l_x,l_y,l_block_width,l_block_height)
 			anim_surface:=l_anim_surface
@@ -58,19 +63,25 @@ feature {NONE} -- Initialization
 feature -- Access
 
 	x:INTEGER
+			-- Horizontal coordinate of `Current'
 	y:INTEGER
+			-- Vertical coordinate of `Current'
 
 	width:NATURAL
+			-- The horizontal dimension of `Current'
 		once
 			Result:=10
 		end
 
 	height:NATURAL
+			-- The vertical dimension of `Current'
 		once
 			Result:=20
 		end
 
 	freeze_tetromino(l_tetromino:TETROMINO)
+			-- When `l_tetromino' is place on `Current', freeze it if
+			-- it cannot move anymore.
 		local
 			i,j,pos_y,pos_x:INTEGER
 		do
@@ -96,6 +107,7 @@ feature -- Access
 		end
 
 	print_playfield_with_tetromino(l_tetromino:TETROMINO;l_surface:GAME_SURFACE)
+			-- Show `Current' and the `l_tetromino' on `l_surface'
 		local
 
 		do
@@ -104,6 +116,7 @@ feature -- Access
 		end
 
 	print_playfield_with_tetromino_and_ghost(l_tetromino,l_ghost:TETROMINO;l_surface:GAME_SURFACE)
+			-- Show `Current', the `l_tetromino' and the tetromino `l_ghost' on `l_surface'
 		local
 
 		do
@@ -113,6 +126,8 @@ feature -- Access
 		end
 
 	print_playfield_with_anim (l_surface: GAME_SURFACE;value:NATURAL)
+			-- Show the `value' iteration of the automatic animation
+			-- of `Current' in `l_surface'
 		require
 			Print_Playfield_With_Anim_Precent_Valid: value<=max_anim_value
 			Print_Playfield_With_Anim_List_Not_Void: anim_List/=Void
@@ -141,6 +156,7 @@ feature -- Access
 		end
 
 	print_playfield(l_surface:GAME_SURFACE)
+			-- Show `Current' on `l_surface'
 		local
 			i,j:INTEGER
 		do
@@ -164,6 +180,7 @@ feature -- Access
 		end
 
 	print_tetromino(l_tetromino:TETROMINO;l_surface:GAME_SURFACE)
+			-- Show `l_tetromino' on `l_surface'
 		local
 			i,j,pos_y,pos_x:INTEGER
 		do
@@ -189,6 +206,8 @@ feature -- Access
 		end
 
 	detect_collision(l_tetromino:TETROMINO):BOOLEAN
+			-- `True' if `l_tetromino' has a collision with a {TETROMINO} of `Current' or
+			-- The edge of `Current'
 		local
 			i,j,pos_y,pos_x:INTEGER
 		do
@@ -251,6 +270,8 @@ feature -- Access
 		end
 
 	remove_full_lines_block
+			-- Remove every block of a single line of `Current' if this one is
+			-- full.
 		local
 			i:INTEGER
 		do
@@ -273,6 +294,7 @@ feature -- Access
 		end
 
 	delete_full_line
+			-- Detect full lines of {BOLCK} and animate the suppression of this line.
 		local
 			i,j:INTEGER
 			line:ARRAYED_LIST[BLOCK]
@@ -299,7 +321,8 @@ feature -- Access
 			nb_full_lines:=0
 		end
 
-		prepare_anim
+	prepare_anim
+			-- Prepare the animation of the suppression of a full line of {BLOCK}
 		require
 			Prepare_Anim_Enable: is_anim_enable
 		do
@@ -329,6 +352,7 @@ feature -- Access
 		end
 
 	clear_anim
+			-- Stop the `Current' full line animation.
 		require
 			Clear_Anim_Enable: is_anim_enable
 		do
@@ -336,28 +360,34 @@ feature -- Access
 		end
 
 	blocks_matrix:LIST[LIST[BLOCK]]
+			-- Every fixed {BOLCK} of `Current'
 
 	nb_full_lines:INTEGER
+			-- The number of line full of {BLOCK}
 
 	full_lines_index:LIST[INTEGER]
+			-- The indexes of every lines full of {BLOCK}
 
 	is_anim_enable:BOOLEAN
+			-- Is `Current' performing an automatic animation
 
 	anim_List:LIST[TUPLE[surface:GAME_SURFACE;line:INTEGER]]
+			-- The list of line to show in the automatic animation of `Current'
 
 	max_anim_value:NATURAL
+			-- Maximum number of iteration to show `Current'
 	med_anim_value:NATURAL
-
-feature {NONE} -- Implementation - Routine
-
-
+			-- Medium number of iteration to show `Current'
 
 feature {NONE} -- Implementation - Variables
 
 	block_width:INTEGER
+			-- The number of {BLOCK} in a line of `Current'
 	block_height:INTEGER
+			-- The number of {BLOCK} in a column of `Current'
 
 	anim_surface:GAME_SURFACE
+			-- The image used to draw `Current' when on automatic animation
 
 
 

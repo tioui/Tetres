@@ -1,5 +1,5 @@
 note
-	description: "Summary description for {TETRIS_CONTROLLER}."
+	description : "The game engine."
 	author      : "Louis Marchand"
 	date        : "July 19 2012"
 	revision    : "1.0"
@@ -47,7 +47,7 @@ feature {NONE} -- Initialization
 			if init_ctrl.custom_control_enable then
 				if init_ctrl.custom_control_ctrl.keyboard_enable then
 					event_controller.on_key_down.extend (agent custom_keyboard_press)
-					event_controller.on_key_up.extend (agent custom_keyboard_up)
+					event_controller.on_key_up.extend (agent custom_keyboard_released)
 				end
 				if init_ctrl.custom_control_ctrl.joystick_enable then
 					event_controller.enable_joystick_event
@@ -62,7 +62,7 @@ feature {NONE} -- Initialization
 
 			else
 				event_controller.on_key_down.extend (agent default_key_press)
-				event_controller.on_key_up.extend (agent on_key_up)
+				event_controller.on_key_up.extend (agent default_key_released)
 			end
 			event_controller.on_iteration.extend(agent on_iteration)
 			event_controller.on_quit_signal.extend(agent on_quit)
@@ -119,11 +119,13 @@ feature {NONE} -- Initialization
 feature -- Access
 
 	launch
+			-- Start the engine of `Current'
 		do
 			lib_ctrl.launch
 		end
 
 	resume
+			-- Resme a paused game
 		do
 			lib_ctrl.replace_event_controller (event_controller)
 			left_pressed:=false
@@ -144,14 +146,17 @@ feature -- Access
 		end
 
 	is_game_over:BOOLEAN
+			-- `True' when the game finished
 
 	last_image_surface:GAME_SURFACE
+			-- The las image to show
 
 
 
 feature {NONE} -- Implementation - Routines
 
 	on_iteration
+			-- Main loop method
 		do
 			if anim_in_progress then
 				cont_anim
@@ -185,6 +190,7 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	on_quit
+			-- When the user quit the game.
 		do
 			if play_sound then
 				if sound_source.is_playing then
@@ -208,6 +214,8 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	default_key_press(keyboard_event:GAME_KEYBOARD_EVENT)
+			-- Manage the keyboard key pressed specified by `keyboard_event'
+			-- Default hardcoded management
 		do
 			if keyboard_event.is_left_key then
 				start_move_left
@@ -230,6 +238,8 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	custom_keyboard_press(keyboard_event:GAME_KEYBOARD_EVENT)
+			-- Manage the keyboard key pressed specified by `keyboard_event'
+			-- Custom input management specified in `init_ctrl'.`custom_control_ctrl'
 		do
 			if not left_pressed and keyboard_event.scancode = init_ctrl.custom_control_ctrl.keyboard_game_left then
 				start_move_left
@@ -263,6 +273,8 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	custom_joystick_button_press(button_id,device_id:NATURAL_8)
+			-- Manage the joystick button pressed specified by `device_id' and `button_id'
+			-- Custom input management specified in `init_ctrl'.`custom_control_ctrl'
 		do
 			if device_id=init_ctrl.custom_control_ctrl.joystick_device_id then
 				if not left_pressed and button_id = init_ctrl.custom_control_ctrl.joystick_button_game_left then
@@ -299,7 +311,9 @@ feature {NONE} -- Implementation - Routines
 
 
 
-	on_key_up(keyboard_event:GAME_KEYBOARD_EVENT)
+	default_key_released(keyboard_event:GAME_KEYBOARD_EVENT)
+			-- Manage the keyboard key released specified by `keyboard_event'
+			-- Default hardcoded management
 		do
 			if keyboard_event.is_left_key then
 				left_pressed:=false
@@ -310,7 +324,9 @@ feature {NONE} -- Implementation - Routines
 			end
 		end
 
-	custom_keyboard_up(keyboard_event:GAME_KEYBOARD_EVENT)
+	custom_keyboard_released(keyboard_event:GAME_KEYBOARD_EVENT)
+			-- Manage the keyboard key released specified by `keyboard_event'
+			-- Custom input management specified in `init_ctrl'.`custom_control_ctrl'
 		do
 			if keyboard_event.scancode = init_ctrl.custom_control_ctrl.keyboard_game_left then
 				left_pressed:=false
@@ -332,6 +348,8 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	custom_joystick_button_release(button_id,device_id:NATURAL_8)
+			-- Manage the joystick button released specified by `device_id' and `button_id'
+			-- Custom input management specified in `init_ctrl'.`custom_control_ctrl'
 		do
 			if device_id=init_ctrl.custom_control_ctrl.joystick_device_id then
 				if button_id = init_ctrl.custom_control_ctrl.joystick_button_game_left then
@@ -355,6 +373,8 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	custom_joystick_axis_change(value:INTEGER_16;axis_id,device_id:NATURAL_8)
+			-- When a user change the joystick axis `value' specified by `device_id' and `axis_id'
+			-- Custom input management specified in `init_ctrl'.`custom_control_ctrl'
 		local
 			active_state:BOOLEAN
 		do
@@ -442,6 +462,7 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	rotate_left
+			-- Rotate left the `currents_tetrominos'
 		do
 			if not anim_in_progress then
 				currents_tetrominos.first.rotate_left
@@ -450,6 +471,7 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	rotate_right
+			-- Rotate right the `currents_tetrominos'
 		do
 			if not anim_in_progress then
 				currents_tetrominos.first.rotate_right
@@ -458,6 +480,7 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	start_move_left
+			-- Begin the left movement of the `currents_tetrominos'
 		do
 			if not anim_in_progress then
 				move_left
@@ -469,6 +492,7 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	start_move_right
+			-- move the `currents_tetrominos' right
 		do
 			if not anim_in_progress then
 				move_right
@@ -479,6 +503,7 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	drop
+			-- Move to the bottom the `currents_tetrominos'
 		local
 			old_y:INTEGER
 		do
@@ -496,6 +521,7 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	hold
+			-- Validate the `hold_tetromino' execution.
 		do
 			if theme_ctrl.hold_field_show and not anim_in_progress then
 				hold_tetromino
@@ -503,6 +529,7 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	finish_rotation
+			-- Manage exception when a rotaion has been used.
 		do
 			from
 				currents_tetrominos.first.wall_kick
@@ -525,6 +552,7 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	move_left
+			-- Move the `currents_tetrominos' left
 		do
 			if not anim_in_progress then
 				currents_tetrominos.first.move_left
@@ -533,6 +561,7 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	move_right
+			-- Move the `currents_tetrominos' right
 		do
 			if not anim_in_progress then
 				currents_tetrominos.first.move_right
@@ -541,6 +570,7 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	finish_move
+			-- Manage exception when a moving has been used.
 		do
 			if pfield.detect_collision (currents_tetrominos.first) then
 				currents_tetrominos.first.cancel_last_move
@@ -556,6 +586,7 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	go_down(down_sound:BOOLEAN)
+			-- Move one block down the `currents_tetrominos'
 		do
 			if not anim_in_progress then
 				currents_tetrominos.first.go_down
@@ -580,6 +611,7 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	valid_lines
+			-- Look for full line
 		local
 			new_delay:INTEGER
 		do
@@ -646,6 +678,7 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	cont_anim
+			-- Next step of the current animation.
 		local
 			old_value:NATURAL
 			l_ticks:NATURAL
@@ -677,6 +710,7 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	update_ghost
+			-- Move the {TETRONIMO} ghost to adapt to the new position of the `currents_tetrominos'
 		do
 			if init_ctrl.is_ghost_show then
 				from
@@ -692,6 +726,9 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	hold_tetromino
+			-- Swap the `currents_tetrominos' and the `holded_tetromino'.
+			-- If there is no `holded_tetromino', put the `holded_tetromino'
+			-- on the `holded_tetromino' and activate the next {TETROMINO}.
 		local
 			swap_tetromino:TETROMINO
 		do
@@ -716,6 +753,7 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	change_current_tetromino
+			-- Switch `currents_tetrominos' to the next {TETROMINO}
 		local
 			new_tetromino_index:INTEGER
 		do
@@ -735,6 +773,8 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	init_currents_tetrominos
+			-- Start the `currents_tetrominos' by placing every tetromino on it
+			-- randomized by a {RANDOM_BAG}
 		local
 			new_tetromino_index,i,nb_next:INTEGER
 		do
@@ -760,6 +800,7 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	update_screen
+			-- Show the scene of `Current'
 		do
 			screen_surface.draw_surface (bg_surface, 0, 0)
 			if not anim_in_progress then
@@ -794,21 +835,25 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	print_level(target_surface:GAME_SURFACE)
+			-- Show the level text on `target_surface'.
 		do
 			target_surface.draw_surface (level_surface, theme_ctrl.level_x, theme_ctrl.level_y)
 		end
 
 	print_lines(target_surface:GAME_SURFACE)
+			-- Show the number of lines text on `target_surface'.
 		do
 			target_surface.draw_surface (lines_surface, theme_ctrl.lines_x+(theme_ctrl.lines_w - lines_surface.width)//2, theme_ctrl.lines_y)
 		end
 
 	print_score(target_surface:GAME_SURFACE)
+			-- Show the score on `target_surface'.
 		do
 			target_surface.draw_surface (score_surface, theme_ctrl.score_x+(theme_ctrl.score_w - score_surface.width)//2, theme_ctrl.score_y)
 		end
 
 	print_next_field
+			-- Show the next {BOLCK} on `target_surface'.
 		local
 			pos:INTEGER
 		do
@@ -837,6 +882,7 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	game_over
+			-- The game is finished. Stop the engin and clear ressources.
 		do
 			update_screen
 			lib_ctrl.stop
@@ -847,6 +893,7 @@ feature {NONE} -- Implementation - Routines
 
 
 	level:INTEGER
+			-- Manage current level of the player.
 		do
 			Result:=(nb_lines//10)+1
 		end
@@ -855,59 +902,116 @@ feature {NONE} -- Implementation - Variables
 
 
 	mem:MEMORY
+			-- Manage automatic memory management for optimisation
 	init_ctrl:INIT_CONTROLLER
+			-- The loaded configuration of the game
 	theme_ctrl:THEME_CONTROLLER
+			-- The visual theme of the game
 	lib_ctrl:GAME_LIB_CONTROLLER
+			-- The game lbrary
 	audio_ctrl:AUDIO_CONTROLLER
+			-- the audio library
 	event_controller:GAME_EVENT_CONTROLLER
+			-- Used to manage input event
 	rnd_bag:RANDOM_BAG
+			-- The bag used to randomize {TETROMINO}
 	blocks_surface:GAME_SURFACE_IMG_FILE
+			-- A surface used th show a {BLOCK}
 	bg_surface:GAME_SURFACE_IMG_FILE
+			-- the image of the background
 	screen_surface:GAME_SURFACE
+			-- The output surface of the screen
 	tetrominos_fact:TETROMINOS_FACTORY
+			-- A factory used to generate {TETROMINO}
 	tetrominos_fact_ghost:TETROMINOS_FACTORY
+			-- A factory used to generate {TETROMINO} ghost
 	pfield:PLAYFIELD
+			-- the game field
 	is_init:BOOLEAN
+			-- `Current' has been initialised
 	is_hold_used:BOOLEAN
+			-- An `hold_tetromino' has been set
 
 	current_tetromino_ghost:TETROMINO
+			-- The ghost of the `currents_tetrominos'
 	currents_tetrominos:LINKED_LIST[TETROMINO]
+			-- Every {TETROMINO} to play (firts is the current).
 	holded_tetromino:TETROMINO
-	left_pressed,right_pressed,down_pressed,drop_pressed,hold_pressed,pause_pressed,rotate_left_pressed,rotate_right_pressed:BOOLEAN
+			-- The {TETROMINO} that has been put on hold
+	left_pressed:BOOLEAN
+			-- Left key has been pressed
+	right_pressed:BOOLEAN
+			-- Right key has been pressed
+	down_pressed:BOOLEAN
+			-- Down key has been pressed
+	drop_pressed:BOOLEAN
+			-- Drop key has been pressed
+	hold_pressed:BOOLEAN
+			-- Hold key has been pressed
+	pause_pressed:BOOLEAN
+			-- Pause key has been pressed
+	rotate_left_pressed:BOOLEAN
+			-- Rotate Left key has been pressed
+	rotate_right_pressed:BOOLEAN
+			-- Rotate right key has been pressed
 
 	down_tick_number:NATURAL
+			-- the number of main loop iteration between each down movement.
 	move_tick_number:NATURAL
+			-- the number of main loop iteration between each left and right movement.
 
 	down_delay:NATURAL
+			-- The delay to use between each down movement.
 	move_delay:NATURAL
+			-- The delay to use between each left and right movement.
 
 	nb_lines:INTEGER
+			-- Number of full line detected
 
 
 	points:INTEGER
+			-- Number of points (score) of the player.
 
 	font:GAME_FONT
+			-- The font used to draw text on the scene.
 	text_color:GAME_COLOR
+			-- The color of every tex to show on the scene
 
 	level_surface:GAME_SURFACE_TEXT
+			-- The text image of the level number
 	score_surface:GAME_SURFACE_TEXT
+			-- The text image of the player's score
+
 	lines_surface:GAME_SURFACE_TEXT
+			-- The text image of the number of lines
 
 	anim_in_progress:BOOLEAN
+			-- `True' if there is an animation in progress.
 	anim_start:NATURAL
+			-- The first `tick' of the animation
 	anim_current_value:NATURAL
+			-- The current `tick' of the animation
 
 	sound_source:AUDIO_SOURCE
+			-- The {AUDIO_SOURCE} used to play individual sound in `Current'
 	sound_drop:AUDIO_SOUND
+			-- {AUDIO_SOUND} to play when a drop is used
 	sound_move:AUDIO_SOUND
+			-- {AUDIO_SOUND} to play when a move is used
 	sound_down:AUDIO_SOUND
+			-- {AUDIO_SOUND} to play when a down is used
 	sound_rotation:AUDIO_SOUND
+			-- {AUDIO_SOUND} to play when a rotation is used
 	sound_anim:AUDIO_SOUND
+			-- {AUDIO_SOUND} to play when an anim is used
 	sound_collapse:AUDIO_SOUND
+			-- {AUDIO_SOUND} to play when lines collapse
 
 	play_sound:BOOLEAN
+			-- `True' if an {AUDIO_SOUND} is playing on the `sound_source'
 
 	music_source:AUDIO_SOURCE
+			-- The {AUDIO_SOURCE} used to play music in `Current'
 
 
 

@@ -1,5 +1,5 @@
 note
-	description: "Summary description for {TETROMINO_I}."
+	description : "The I {TETROMINO}."
 	author      : "Louis Marchand"
 	date        : "July 19 2012"
 	revision    : "1.0"
@@ -24,7 +24,9 @@ create
 feature {NONE} -- Initialization
 
 	make(l_surface:GAME_SURFACE;block_width,block_height:NATURAL;rotation:BOOLEAN)
-			-- Initialization for `Current'.
+			-- Initialisation of `Current' using the images on `l_surface' with {BLOCK}
+			-- of dimension `block_width'x`block_height'.
+			-- If `rotation' is `True', apply rotation on individual {BLOCK}.
 		do
 			make_tetromino(l_surface,1,block_width,block_height,rotation)
 			y:=21
@@ -33,6 +35,7 @@ feature {NONE} -- Initialization
 feature -- Access
 
 	default_state
+			-- <Precursor>
 		do
 			precursor
 			y:=21
@@ -41,6 +44,7 @@ feature -- Access
 feature {NONE} -- Initialisation
 
 	blocks_positions_init:ARRAY[TUPLE[row,column:INTEGER]]
+			-- <Precursor>
 		once
 			Result:=<<	[2,1],[2,2],[2,3],[2,4],
 						[1,3],[2,3],[3,3],[4,3],
@@ -50,6 +54,7 @@ feature {NONE} -- Initialisation
 
 
 	init_wall_kicks_list
+			-- <Precursor>
 		local
 			temp_list:ARRAYED_LIST[TUPLE[x,y:INTEGER]]
 		do

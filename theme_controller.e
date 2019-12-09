@@ -1,5 +1,5 @@
 note
-	description: "Summary description for {THEME_CONTROLLER}."
+	description : "Manage theme (Visual and sound) of the game."
 	author      : "Louis Marchand"
 	date        : "July 19 2012"
 	revision    : "1.0"
@@ -15,7 +15,7 @@ feature {NONE} -- Initialization
 
 
 	make(theme_name:STRING)
-			-- Initialization for `Current'.
+			-- Initialization for `Current' using theme named `theme_name' using XML theme file.
 		local
 			pars:XML_STANDARD_PARSER
 			tree_pipe: XML_CALLBACKS_DOCUMENT
@@ -47,6 +47,7 @@ feature {NONE} -- Initialization
 		end
 
 	set_default_values(theme_name:STRING)
+			-- Initialization for `Current' using theme named `theme_name' using default values.
 		local
 
 		do
@@ -96,6 +97,7 @@ feature {NONE} -- Initialization
 		end
 
 	process_document(document:XML_DOCUMENT)
+			-- Load theme from `document'
 		local
 			elements:LIST[XML_ELEMENT]
 		do
@@ -112,6 +114,7 @@ feature {NONE} -- Initialization
 		end
 
 	process_element(element:XML_ELEMENT)
+			-- Load every theme sub-section specified by `element'
 		do
 			if element.name.is_equal ("theme") then
 				process_theme_element(element)
@@ -147,6 +150,7 @@ feature {NONE} -- Initialization
 		end
 
 	process_playfield_element(element:XML_ELEMENT)
+			-- Load playfield from `element'
 		local
 			is_x_set:BOOLEAN
 			is_y_set:BOOLEAN
@@ -177,6 +181,7 @@ feature {NONE} -- Initialization
 		end
 
 	process_hold_field_element(element:XML_ELEMENT)
+			-- Load hold field from `element'
 		local
 			attributes:LIST[XML_ATTRIBUTE]
 		do
@@ -202,6 +207,7 @@ feature {NONE} -- Initialization
 		end
 
 	process_font_element(element:XML_ELEMENT)
+			-- Load font from `element'
 		local
 			attributes:LIST[XML_ATTRIBUTE]
 		do
@@ -223,6 +229,7 @@ feature {NONE} -- Initialization
 		end
 
 	process_title_element(element:XML_ELEMENT)
+			-- Load title from `element'
 		local
 			attributes:LIST[XML_ATTRIBUTE]
 		do
@@ -242,6 +249,7 @@ feature {NONE} -- Initialization
 		end
 
 	process_lines_anim_element(element:XML_ELEMENT)
+			-- Load full line animation from `element'
 		local
 			attributes:LIST[XML_ATTRIBUTE]
 		do
@@ -267,6 +275,7 @@ feature {NONE} -- Initialization
 		end
 
 	process_score_element(element:XML_ELEMENT)
+			-- Load score field from `element'
 		local
 			attributes:LIST[XML_ATTRIBUTE]
 		do
@@ -296,6 +305,7 @@ feature {NONE} -- Initialization
 		end
 
 	process_level_element(element:XML_ELEMENT)
+			-- Load level field from `element'
 		local
 			attributes:LIST[XML_ATTRIBUTE]
 		do
@@ -321,6 +331,7 @@ feature {NONE} -- Initialization
 		end
 
 	process_lines_element(element:XML_ELEMENT)
+			-- Load number of lines field from `element'
 		local
 			attributes:LIST[XML_ATTRIBUTE]
 		do
@@ -350,6 +361,7 @@ feature {NONE} -- Initialization
 		end
 
 	process_next_field_element(element:XML_ELEMENT)
+			-- Load next tetromino field from `element'
 		local
 			attributes:LIST[XML_ATTRIBUTE]
 		do
@@ -385,6 +397,7 @@ feature {NONE} -- Initialization
 		end
 
 	process_block_element(element:XML_ELEMENT)
+			-- Load {BLOCK} from `element'
 		local
 			is_width_set:BOOLEAN
 			is_height_set:BOOLEAN
@@ -417,6 +430,7 @@ feature {NONE} -- Initialization
 		end
 
 	process_game_over_element(element:XML_ELEMENT)
+			-- Load game over screen from `element'
 		local
 			attributes:LIST[XML_ATTRIBUTE]
 		do
@@ -436,6 +450,7 @@ feature {NONE} -- Initialization
 		end
 
 	process_ghost_element(element:XML_ELEMENT)
+			-- Load ghost management from `element'
 		local
 			attributes:LIST[XML_ATTRIBUTE]
 		do
@@ -455,6 +470,7 @@ feature {NONE} -- Initialization
 		end
 
 	process_files_element(element:XML_ELEMENT)
+			-- Load theme files (image, font, sound, etc.) from `element'
 		local
 			attributes:LIST[XML_ATTRIBUTE]
 		do
@@ -537,6 +553,7 @@ feature {NONE} -- Initialization
 		end
 
 	process_theme_element(element:XML_ELEMENT)
+			-- Load theme attributes from `element'
 		local
 			is_name_set:BOOLEAN
 			is_width_set:BOOLEAN
@@ -578,6 +595,7 @@ feature {NONE} -- Initialization
 		end
 
 	process_menu_element(element:XML_ELEMENT)
+			-- Load menus from `element'
 		local
 			is_resume_x_set:BOOLEAN
 			is_resume_y_set:BOOLEAN
@@ -644,8 +662,6 @@ feature {NONE} -- Initialization
 				end
 				attributes.forth
 			end
-
-
 			is_menu_set:=	is_resume_x_set and is_resume_y_set and is_new_game_x_set and is_new_game_y_set and
 							is_quit_x_set and is_quit_y_set
 		end
@@ -653,120 +669,212 @@ feature {NONE} -- Initialization
 feature -- Access
 
 	is_theme_set:BOOLEAN
+			-- `True' if a theme as been loaded
 	is_block_set:BOOLEAN
+			-- `True' if {BLOCK} theme as been loaded
 	is_playfield_set:BOOLEAN
+			-- `True' if {PlAYFIELD} theme as been loaded
 	is_next_field_set:BOOLEAN
+			-- `True' if next {TETROMINO} field theme as been loaded
 	is_menu_set:BOOLEAN
+			-- `True' if menu theme as been loaded
 	is_title_screen:BOOLEAN
+			-- `True' if title screen theme as been loaded
 
 	name:STRING
+			-- The name of the loaded theme
 	width:NATURAL
+			-- Horizontal dimension of `Current'
 	height:NATURAL
+			-- Vertical dimension of `Current'
 
 	block_width:NATURAL
+			-- Horizontal dimension of a {BLOCK}
 	block_height:NATURAL
+			-- Vertical dimension of a {BLOCK}
 	block_rotation:BOOLEAN
+			-- `True' if rotation must apply to individual {BLOCK}
 
 	playfield_x:INTEGER
+			-- Horizontal position of the {PLAYFIELD}
 	playfield_y:INTEGER
+			-- Vertical position of the {PLAYFIELD}
 
 	bpp:NATURAL
+			-- Window internal bits per pixel
 
 	fullscreen:BOOLEAN
+			-- Window must start full-screen
 
 	directory_name:STRING
+			-- The directory to get ressources and configuration files
 	config_file_name:STRING
+			-- The file name of the configuration file
 	bg_file_name:STRING
+			-- The file name containing the background
 	blocks_file_name:STRING
+			-- The file name containing the blocks images
 	menu_init_file_name:STRING
+			-- The file name containing the menu
 	menu_resume_file_name:STRING
+			-- The file name containing the resume menu
 	font_file_name:STRING
+			-- The file name containing the text font
 	arrow_file_name:STRING
+			-- The file name containing the menu item cursor
 	game_over_file_name:STRING
+			-- The file name containing the game over screen
 	lines_anim_file_name:STRING
+			-- The file name containing the full line animation
 	title_file_name:STRING
+			-- The file name containing the title screen
 
 	title_delay:NATURAL
+			-- The delay used when showing the title screen
 
 	ghost_alpha:NATURAL_8
+			-- The alpha value used as transparency for {TETROMINO} ghost
 
 	menu_resume_x:INTEGER
+			-- The horizontal position of the resume menu
 	menu_resume_y:INTEGER
+			-- The vertical position of the resume menu
 	menu_new_game_x:INTEGER
+			-- The horizontal position of the new game menu
 	menu_new_game_y:INTEGER
+			-- The vertical position of the new game menu
 	menu_quit_x:INTEGER
+			-- The horizontal position of the quit menu
 	menu_quit_y:INTEGER
+			-- The vertical position of the quit menu
 	menu_resume_mirror:BOOLEAN
+			-- Apply mirror on the resume menu
 	menu_new_game_mirror:BOOLEAN
+			-- Apply mirror on the new game menu
 	menu_settings_mirror:BOOLEAN
+			-- Apply mirror on the settings menu
 	menu_quit_mirror:BOOLEAN
+			-- Apply mirror on the quit game menu
 	menu_bg_alpha:NATURAL_8
+			-- Alphga value of the applied transparency of the menu background
 
 	game_over_time:NATURAL_32
+			-- The time of the game over show
 
 	hold_field_show:BOOLEAN
+			-- `True' if there is a hold field to show
 	hold_field_x:INTEGER
+			-- The horizontal position of the hold field
 	hold_field_y:INTEGER
+			-- The vertical position of the hold field
 
 	next_field_show:BOOLEAN
+			-- `True' if there is a next field to show
 	next_field_x:INTEGER
+			-- The horizontal position of the next field
 	next_field_y:INTEGER
+			-- The vertical position of the next field
 	next_field_vertical:BOOLEAN
+			-- `True' if the next field must be managed vertically
 	next_field_padding:INTEGER
+			-- Free space around the next field
 	next_field_nb:INTEGER
+			-- The number of {TETROMINO} to show on the next field
 
 	font_size:INTEGER
+			-- The size of the font to use to show text
 	font_color:STRING
+			-- The color of the font to use to show text
 
 	score_show:BOOLEAN
+			-- `True' if there is a score field to show
 	score_x:INTEGER
+			-- The horizontal position of the score field
 	score_y:INTEGER
+			-- The horizontal position of the score field
 	score_w:INTEGER
+			-- The horizontal dimension of the score field
 
 	lines_show:BOOLEAN
+			-- `True' if there is a number of lines field to show
 	lines_x:INTEGER
+			-- The horizontal position of the number of lines field
 	lines_y:INTEGER
+			-- The horizontal position of the number of lines field
 	lines_w:INTEGER
+			-- The horizontal dimension of the number of lines field
 
 	level_show:BOOLEAN
+			-- `True' if there is a level field to show
 	level_x:INTEGER
+			-- The horizontal position of the level field
 	level_y:INTEGER
+			-- The horizontal position of the level field
 
 	lines_anim_show:BOOLEAN
+			-- `True' if there is a full lines anumation to show
 	lines_anim_delay:NATURAL
+			-- The delay to use on full lines animation
 	lines_anim_step:NATURAL
+			-- The animation step to use on full lines
 
 	is_sound_enable:BOOLEAN
+			-- `True' if there is sound
 	is_sound_menu_move:BOOLEAN
+			-- `True' if there is a sound when moving on the menu
 	sound_menu_move_file:STRING
+			-- File containing the sound to play when moving on menu
 	is_sound_menu_enter:BOOLEAN
+			-- `True' if there is a sound when entering a menu item
 	sound_menu_enter_file:STRING
+			-- File containing the sound to play when entering an intem on menu
 	is_sound_game_rotation:BOOLEAN
+			-- `True' if there is a sound when rotating a {TETROMINO}
 	sound_game_rotation_file:STRING
+			-- File containing the sound to play when rotating a {TETROMINO} on the game
 	is_sound_game_drop:BOOLEAN
+			-- `True' if there is a sound when droping a {TETROMINO}
 	sound_game_drop_file:STRING
+			-- File containing the sound to play when dropping a {TETROMINO} on the game
 	is_sound_game_move:BOOLEAN
+			-- `True' if there is a sound when moving a {TETROMINO}
 	sound_game_move_file:STRING
+			-- File containing the sound to play when moving a {TETROMINO} on the game
 	is_sound_game_down:BOOLEAN
+			-- `True' if there is a sound when moving down a {TETROMINO}
 	sound_game_down_file:STRING
+			-- File containing the sound to play when moving down a {TETROMINO} on the game
 	is_sound_game_anim:BOOLEAN
+			-- `True' if there is a sound on full lines animation
 	sound_game_anim_file:STRING
+			-- File containing the sound to play on the full line animation
 	is_sound_game_collapse:BOOLEAN
+			-- `True' if there is a sound when collapsing lines
 	sound_game_collapse_file:STRING
+			-- File containing the sound to play when collapsing lines on the game
 
 	is_music_game:BOOLEAN
+			-- `True' if there is music in the game
 	is_music_game_intro:BOOLEAN
+			-- `True' if there is an intro music in the game
 	music_game_intro_file:STRING
+			-- File containing the intro music of the game
 	music_game_loop_file:STRING
+			-- File containing the loop music of the game
 
 	is_music_menu:BOOLEAN
+			-- `True' if there is music in the menu
 	is_music_menu_intro:BOOLEAN
+			-- `True' if there is an intro music in the menu
 	music_menu_intro_file:STRING
+			-- File containing the intro music of the menu
 	music_menu_loop_file:STRING
+			-- File containing the loop music of the menu
 
 feature -- Error handelling
 
 	has_error:BOOLEAN
+			-- `True' if there was an error in `Current'
 
 
 

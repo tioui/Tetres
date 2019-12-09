@@ -1,5 +1,5 @@
 note
-	description : "The Tetres game engine"
+	description : "The Tetres main engine"
 	date        : "July 19 2012"
 	revision    : "1.0"
 
