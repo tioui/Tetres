@@ -1,8 +1,8 @@
 note
-	description: "Summary description for {RANDOM_BAG}."
-	author: ""
-	date: "$Date$"
-	revision: "$Revision$"
+	description : "A bag that is used to randomize {TETROMINO} `pick' order."
+	author      : "Louis Marchand"
+	date        : "July 19 2012"
+	revision    : "1.0"
 
 class
 	RANDOM_BAG
@@ -13,7 +13,8 @@ create
 feature {NONE} -- Initialization
 
 	make(rnd_ctrl:GAME_RANDOM_CONTROLLER;min,max:INTEGER)
-			-- Initialization for `Current'.
+			-- Initialization for `Current' using `rnd_ctrl' as `random_ctrl' and
+			-- `min' and `max' as possible value in the `bag'.
 		require
 			rnd_ctrl/=Void
 		do
@@ -26,25 +27,31 @@ feature {NONE} -- Initialization
 feature -- Access
 
 	pick
+		-- Assign the next element of `Current' to `last_pick' and remove it.
 		do
 			if bag.count<1 then
 				fill_bag
 			end
-			get_last_pick:=bag.item
+			last_pick:=bag.item
 			bag.remove
 		ensure
-			Random_Bag_Pick_Value_Valid:get_last_pick>=min_value and get_last_pick<=max_value
+			Random_Bag_Pick_Value_Valid: last_pick>=min_value and last_pick<=max_value
 		end
 
-	get_last_pick:INTEGER
+	last_pick:INTEGER
+			-- The last element that has been assign by `pick'
 
 	max_value:INTEGER
+			-- The maximal value that `Current' can `pick'
 
 	min_value:INTEGER
+			-- The minimal value that `Current' can `pick'
 
 feature {NONE} -- Implementation - Routines
 
 	fill_bag
+			-- Add every possible element between `min_value'
+			-- and `max_value' in the `bag' with random order.
 		local
 			value_list:LINKED_LIST[INTEGER]
 			i:INTEGER
@@ -76,6 +83,9 @@ feature {NONE} -- Implementation - Routines
 feature {NONE} -- Implementation - Variables
 
 	bag:ARRAYED_STACK[INTEGER]
+			-- {STACK} that contain every element to `pick' in random order.
+
 	random_ctrl:GAME_RANDOM_CONTROLLER
+			-- Random manager used to randomize the elements of `bag'
 
 end

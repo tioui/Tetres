@@ -1,8 +1,8 @@
 note
 	description: "Summary description for {TETRIS_AUTO_CONTROLLER}."
-	author: ""
-	date: "$Date$"
-	revision: "$Revision$"
+	author      : "Louis Marchand"
+	date        : "July 19 2012"
+	revision    : "1.0"
 
 class
 	TETRIS_AUTO_CONTROLLER

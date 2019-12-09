@@ -1,7 +1,7 @@
 note
-	description : "Mouse-text application root class"
-	date        : "$Date$"
-	revision    : "$Revision$"
+	description : "The Tetres game engine"
+	date        : "July 19 2012"
+	revision    : "1.0"
 
 class
 	APPLICATION
@@ -12,6 +12,7 @@ create
 feature {NONE} -- Initialization
 
 	make
+			-- Initialization of `Current'
 		local
 			lib_ctrl:GAME_LIB_CONTROLLER
 			audio_ctrl:AUDIO_CONTROLLER
@@ -30,6 +31,7 @@ feature {NONE} -- Initialization
 		end
 
 	run_standard(lib_ctrl:GAME_LIB_CONTROLLER;audio_ctrl:AUDIO_CONTROLLER;text_ctrl:GAME_TEXT_CONTROLLER)
+			-- Main loop of the game.
 		local
 			init_ctrl:INIT_CONTROLLER
 			theme_ctrl:THEME_CONTROLLER
@@ -132,6 +134,7 @@ feature {NONE} -- Initialization
 		end
 
 	show_title(l_theme_ctrl:THEME_CONTROLLER; l_lib_ctrl:GAME_LIB_CONTROLLER)
+			-- Show the title in the Window
 		local
 			title_surface:GAME_SURFACE_IMG_FILE
 		do
@@ -141,6 +144,7 @@ feature {NONE} -- Initialization
 		end
 
 	show_menu(is_resume:BOOLEAN;l_surface:GAME_SURFACE;l_init_ctrl:INIT_CONTROLLER; l_theme_ctrl:THEME_CONTROLLER; l_lib_ctrl:GAME_LIB_CONTROLLER;l_audio_ctrl:AUDIO_CONTROLLER)
+			-- Show the menu in the window
 		local
 			menu_ctrl:MENU_CONTROLLER
 		do
@@ -159,6 +163,7 @@ feature {NONE} -- Initialization
 
 
 	game_over_screen(lib_ctrl:GAME_LIB_CONTROLLER;theme_ctrl:THEME_CONTROLLER;l_surface:GAME_SURFACE)
+			-- Show the Game over screen in the window
 		local
 			game_over_surface:GAME_SURFACE_IMG_FILE
 		do
@@ -172,10 +177,13 @@ feature {NONE} -- Initialization
 		end
 
 	quitting:BOOLEAN
+			-- State value indicating that `Current' must quit.
 
 	starting:BOOLEAN
+			-- State value indicating that `Current' must start the game.
 
 	resuming:BOOLEAN
+			-- State value indicating that `Current' must continue the game.
 
 
 end

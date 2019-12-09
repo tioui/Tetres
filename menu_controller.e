@@ -1,8 +1,8 @@
 note
-	description: "Summary description for {MENU_CONTROLLER}."
-	author: ""
-	date: "$Date$"
-	revision: "$Revision$"
+	description : "Manage the game menu."
+	author      : "Louis Marchand"
+	date        : "July 19 2012"
+	revision    : "1.0"
 
 class
 	MENU_CONTROLLER
@@ -15,7 +15,9 @@ create
 feature {NONE} -- Initialization
 
 	make(l_init_ctrl:INIT_CONTROLLER; l_theme_ctrl:THEME_CONTROLLER; l_lib_ctrl:GAME_LIB_CONTROLLER;l_audio_ctrl:AUDIO_CONTROLLER)
-			-- Initialization for `Current'.
+			-- Initialization for `Current' using `l_init_ctrl' to load config, `l_theme_ctrl' to
+			-- load the theme, `l_lib_ctrl' as game library controller and `l_audio_ctrl' as audio library
+			-- controller.
 		do
 			make_default (l_init_ctrl, l_theme_ctrl, l_lib_ctrl,l_audio_ctrl)
 			create tetris_ctrl.make(init_ctrl, theme_ctrl, lib_ctrl,theme_ctrl.menu_bg_alpha)
@@ -26,6 +28,9 @@ feature {NONE} -- Initialization
 		end
 
 	make_with_resume(l_surface:GAME_SURFACE;l_init_ctrl:INIT_CONTROLLER; l_theme_ctrl:THEME_CONTROLLER; l_lib_ctrl:GAME_LIB_CONTROLLER;l_audio_ctrl:AUDIO_CONTROLLER)
+			-- Initialization for `Current' using `l_surface' as background, `l_init_ctrl' to load config,
+			-- `l_theme_ctrl' to load the theme, `l_lib_ctrl' as game library controller and
+			-- `l_audio_ctrl' as audio library controller.
 		do
 			make_default (l_init_ctrl, l_theme_ctrl, l_lib_ctrl,l_audio_ctrl)
 			create bk_surface.make_with_bit_per_pixel (l_surface.width, l_surface.height, l_surface.bits_per_pixel, false)
@@ -41,6 +46,9 @@ feature {NONE} -- Initialization
 		end
 
 	make_default(l_init_ctrl:INIT_CONTROLLER; l_theme_ctrl:THEME_CONTROLLER; l_lib_ctrl:GAME_LIB_CONTROLLER;l_audio_ctrl:AUDIO_CONTROLLER)
+			-- Initialization for `Current' using `l_init_ctrl' to load config, `l_theme_ctrl' to
+			-- load the theme, `l_lib_ctrl' as game library controller and `l_audio_ctrl' as audio library
+			-- controller.
 		local
 			music:AUDIO_SOUND_SND_FILE
 		do
@@ -103,6 +111,7 @@ feature {NONE} -- Initialization
 feature -- Access
 
 	launch
+			-- Main loop of the menu.
 		do
 			lib_ctrl.launch
 			if stop_on_enter_sound_finish then
@@ -116,14 +125,19 @@ feature -- Access
 		end
 
 	is_quitting:BOOLEAN
+			-- Status flag that indicate that the menu must quit
 
 	start_game:BOOLEAN
+			-- Status flag that indicate that the menu must start the game
 
 	is_resuming:BOOLEAN
+			-- Status flag that indicate that the menu must resume a paused game
 
 --	is_settings:BOOLEAN
+			-- Status flag that indicate that the menu must shot settings screen.
 
 	dispose
+			-- Close every ressources used by `Current'
 		do
 			if theme_ctrl.is_sound_enable then
 				sound_source.stop
@@ -139,6 +153,7 @@ feature -- Access
 feature {NONE} -- Implementation - Routines
 
 	on_tick
+			-- Manage menu FPS
 		do
 			if last_tick+100<lib_ctrl.get_ticks then
 				update_screen
@@ -147,6 +162,7 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	on_quit
+			-- Manage the quitting
 		do
 			is_quitting:=true
 			start_game:=false
@@ -156,6 +172,8 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	on_default_key_press(keyboard_event:GAME_KEYBOARD_EVENT)
+			-- When a user press a key specified in `keyboard_event'.
+			-- Manage the default hard coded key values
 		do
 			if keyboard_event.is_escape_key then
 				if resume_enable then
@@ -178,6 +196,8 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	on_custom_key_press(keyboard_event:GAME_KEYBOARD_EVENT)
+			-- When a user press a key specified in `keyboard_event'.
+			-- Manage the key values managed by `init_ctrl'.`custom_control_ctrl'
 		do
 			if not back_pressed and keyboard_event.scancode = init_ctrl.custom_control_ctrl.keyboard_menu_back then
 				if resume_enable then
@@ -203,6 +223,8 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	on_custom_key_release(keyboard_event:GAME_KEYBOARD_EVENT)
+			-- When a user release a key specified in `keyboard_event'.
+			-- Manage the key values managed by `init_ctrl'.`custom_control_ctrl'
 		do
 			if keyboard_event.scancode = init_ctrl.custom_control_ctrl.keyboard_menu_back then
 				back_pressed:=false
@@ -216,6 +238,8 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	custom_joystick_button_press(button_id,device_id:NATURAL_8)
+			-- When a user press the joystick button specified by `device_id' and `button_id'
+			-- Manage the joystick button managed by `init_ctrl'.`custom_control_ctrl'
 		do
 			if device_id=init_ctrl.custom_control_ctrl.joystick_device_id then
 				if not back_pressed and button_id = init_ctrl.custom_control_ctrl.joystick_button_menu_back then
@@ -243,6 +267,8 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	custom_joystick_button_release(button_id,device_id:NATURAL_8)
+			-- When a user release the joystick button specified by `device_id' and `button_id'
+			-- Manage the joystick button managed by `init_ctrl'.`custom_control_ctrl'
 		do
 			if device_id=init_ctrl.custom_control_ctrl.joystick_device_id then
 				if button_id = init_ctrl.custom_control_ctrl.joystick_button_menu_back then
@@ -258,6 +284,8 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	custom_joystick_axis_change(value:INTEGER_16;axis_id,device_id:NATURAL_8)
+			-- When a user change the joystick axis `value' specified by `device_id' and `axis_id'
+			-- Manage the joystick axis values managed by `init_ctrl'.`custom_control_ctrl'
 		local
 			active_state:BOOLEAN
 		do
@@ -314,6 +342,7 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	move_up
+			-- Move the menu cursor up
 		do
 			if is_quitting then
 				is_quitting:=false
@@ -348,6 +377,7 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	move_down
+			-- Move the menu cursor down
 		do
 			if is_resuming then
 				is_resuming:=false
@@ -377,6 +407,7 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	on_enter
+			-- Enter the selected menu item
 		do
 			if theme_ctrl.is_sound_menu_enter then
 				sound_source.stop
@@ -389,6 +420,7 @@ feature {NONE} -- Implementation - Routines
 		end
 
 	update_screen
+			-- Redraw `Current'
 		do
 			lib_ctrl.screen_surface.fill_rect (create {GAME_COLOR}.make_rgb(0,0,0), 0, 0, lib_ctrl.screen_surface.width, lib_ctrl.screen_surface.height)
 			if resume_enable then
@@ -430,29 +462,53 @@ feature {NONE} -- Implementation - Routines
 feature {NONE} -- Implementation - Variables
 
 	init_ctrl:INIT_CONTROLLER
+			-- The configuration loaded from a config file
 	theme_ctrl:THEME_CONTROLLER
+			-- The theme to use in `Current'
 	lib_ctrl:GAME_LIB_CONTROLLER
+			-- The game library to use in `Current'
 	audio_ctrl:AUDIO_CONTROLLER
+			-- The audio library to use in `Current'
 	tetris_ctrl:TETRIS_AUTO_CONTROLLER
+			-- A tetris that play automatically
 	bk_surface:GAME_SURFACE
+			-- The image to show in the background
 	fg_surface:GAME_SURFACE
+			-- The image to show in the foreground
 	arrow_surface:GAME_SURFACE
+			-- Image of the cursor
 	arrow_mirror_surface:GAME_SURFACE
+			-- The `arrow_surface' mirrored
 	is_animate:BOOLEAN
+			-- Status flags that indicate that `Curent' is animaged
 
 	resume_enable:BOOLEAN
+			-- Status flags that indicate that `Curent' can resume a paused game
 
 	last_tick:NATURAL
+			-- Used to manage FPS
 
-	back_pressed, up_pressed, down_pressed, enter_pressed:BOOLEAN
+	back_pressed:BOOLEAN
+			-- Indicate that the back button is pressed.
+	up_pressed:BOOLEAN
+			-- Indicate that the up button is pressed.
+	down_pressed:BOOLEAN
+			-- Indicate that the down button is pressed.
+	enter_pressed:BOOLEAN
+			-- Indicate that the enter button is pressed.
 
 	sound_source:AUDIO_SOURCE
+			-- The audio source used when changing selected item.
 	sound_move:AUDIO_SOUND
+			-- The sound used when changing selected item.
 	sound_enter:AUDIO_SOUND
+			-- The sound used when entering a selected item.
 
 	stop_on_enter_sound_finish:BOOLEAN
+			-- If `True', wait for the sound to finish before changing screen.
 
 	music_source:AUDIO_SOURCE
+			-- The audio source used for the backgroud music.
 
 
 end

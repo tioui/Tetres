@@ -1,8 +1,8 @@
 note
 	description: "Summary description for {TETRIS_CONTROLLER}."
-	author: ""
-	date: "$Date$"
-	revision: "$Revision$"
+	author      : "Louis Marchand"
+	date        : "July 19 2012"
+	revision    : "1.0"
 
 class
 	TETRIS_CONTROLLER
@@ -722,7 +722,7 @@ feature {NONE} -- Implementation - Routines
 			is_hold_used:=false
 			down_pressed:=false
 			rnd_bag.pick
-			new_tetromino_index:=rnd_bag.get_last_pick
+			new_tetromino_index:=rnd_bag.last_pick
 			currents_tetrominos.start
 			currents_tetrominos.remove
 			currents_tetrominos.extend (tetrominos_fact.get_tetromino_by_index (new_tetromino_index))
@@ -750,7 +750,7 @@ feature {NONE} -- Implementation - Routines
 				i>nb_next
 			loop
 				rnd_bag.pick
-				new_tetromino_index:=rnd_bag.get_last_pick
+				new_tetromino_index:=rnd_bag.last_pick
 				currents_tetrominos.extend (tetrominos_fact.get_tetromino_by_index (new_tetromino_index))
 				i:=i+1
 			end

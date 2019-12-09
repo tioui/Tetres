@@ -1,8 +1,8 @@
 note
 	description: "Summary description for {TETROMINO}."
-	author: ""
-	date: "$Date$"
-	revision: "$Revision$"
+	author      : "Louis Marchand"
+	date        : "July 19 2012"
+	revision    : "1.0"
 
 deferred class
 	TETROMINO

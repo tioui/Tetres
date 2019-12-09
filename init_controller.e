@@ -1,8 +1,8 @@
 note
-	description: "Summary description for {INIT_CONTROLLER}."
-	author: ""
-	date: "$Date$"
-	revision: "$Revision$"
+	description : "XML Loader for the game themes and configuration."
+	author      : "Louis Marchand"
+	date        : "July 19 2012"
+	revision    : "1.0"
 
 class
 	INIT_CONTROLLER
@@ -44,6 +44,7 @@ feature {NONE} -- Initialization
 		end
 
 	set_default_value
+			-- Assign default values to status flags of `Current'
 		do
 			is_material_video_memory:=false
 			is_material_double_buffer:=false
@@ -54,6 +55,7 @@ feature {NONE} -- Initialization
 		end
 
 	process_document(document:XML_DOCUMENT)
+			-- Get values from a `document'
 		local
 			elements:LIST[XML_ELEMENT]
 		do
@@ -72,6 +74,7 @@ feature {NONE} -- Initialization
 		end
 
 	process_element(element:XML_ELEMENT)
+			-- Get values from a specific `element'
 		do
 			if element.name.is_equal ("theme") then
 				process_theme_element(element)
@@ -89,6 +92,7 @@ feature {NONE} -- Initialization
 		end
 
 	process_material_element(element:XML_ELEMENT)
+			-- Get material values from `element'
 		local
 			attributes:LIST[XML_ATTRIBUTE]
 		do
@@ -108,6 +112,7 @@ feature {NONE} -- Initialization
 		end
 
 	process_theme_element(element:XML_ELEMENT)
+			-- Get theme values from `element'
 		local
 			is_theme_name_set:BOOLEAN
 			attributes:LIST[XML_ATTRIBUTE]
@@ -129,6 +134,7 @@ feature {NONE} -- Initialization
 		end
 
 	process_ghost_element(element:XML_ELEMENT)
+			-- Get tetrominos ghosts values from `element'
 		local
 			attributes:LIST[XML_ATTRIBUTE]
 		do
@@ -146,6 +152,7 @@ feature {NONE} -- Initialization
 		end
 
 	process_cpf_element(element:XML_ELEMENT)
+			-- Get fonts values from `element'
 		local
 			attributes:LIST[XML_ATTRIBUTE]
 		do
@@ -163,6 +170,7 @@ feature {NONE} -- Initialization
 		end
 
 	process_custom_control_element(element:XML_ELEMENT)
+			-- Get controls values from `element'
 		local
 			elements:LIST[XML_ELEMENT]
 		do
@@ -184,6 +192,7 @@ feature {NONE} -- Initialization
 		end
 
 	process_custom_control_keyboard_element(element:XML_ELEMENT)
+			-- Get keyboard control values from `element'
 		local
 			attributes:LIST[XML_ATTRIBUTE]
 		do
@@ -256,6 +265,7 @@ feature {NONE} -- Initialization
 		end
 
 	process_custom_control_joystick_element(element:XML_ELEMENT)
+			-- Get joystick control values from `element'
 		local
 			attributes:LIST[XML_ATTRIBUTE]
 			elements:LIST[XML_ELEMENT]
@@ -290,6 +300,7 @@ feature {NONE} -- Initialization
 		end
 
 	process_custom_control_joystick_buttons_element(element:XML_ELEMENT)
+			-- Get joystick buttons control values from `element'
 		local
 			attributes:LIST[XML_ATTRIBUTE]
 		do
@@ -363,6 +374,7 @@ feature {NONE} -- Initialization
 
 
 	process_custom_control_joystick_axis_element(element:XML_ELEMENT)
+			-- Get joystck buttons control values from `element'
 		local
 			attributes:LIST[XML_ATTRIBUTE]
 		do
@@ -547,6 +559,7 @@ feature {NONE} -- Initialization
 		end
 
 	process_sound_element(element:XML_ELEMENT)
+			-- Get sound values from `element'
 		local
 			attributes:LIST[XML_ATTRIBUTE]
 		do
@@ -566,24 +579,35 @@ feature {NONE} -- Initialization
 feature -- Access
 
 	is_theme_set:BOOLEAN
+			-- Status that indicate that a theme has been loaded.
+
 	theme_name:STRING
+			-- If `is_theme_set', the name of the theme that has been loaded.
 
 	is_material_video_memory:BOOLEAN
+			-- Status that indicate that material must be loaded in video memory
 	is_material_double_buffer:BOOLEAN
+			-- Status that indicate that the game must use double buffering
 
 	is_ghost_show:BOOLEAN
+			-- Status that indicate that a theme has tetromino ghosts.
 
 	is_font_cpf:BOOLEAN
+			-- Status that indicate that a theme has a font.
 
 	custom_control_enable:BOOLEAN
+			-- Status that indicate that a custon control has been set.
 
 	custom_control_ctrl:CUSTOM_CONTROL_CONTROLLER
+			-- If `custom_control_enable', the control controller that has been loaded.
 
 	is_sound_thread:BOOLEAN
+			-- Status that indicate that sound must be used in a multi-threaded context.
 
 
 feature -- Error handelling
 
 	has_error:BOOLEAN
+			-- Status that indicate that there was an error in `Current'.
 
 end
